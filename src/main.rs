@@ -20,7 +20,7 @@ fn main() {
 
     let parsed = parser.parse(&code, None).expect("Error parsing code");
 
-    let rules = fs::read_to_string("./rules/go.txt").expect("Unable to read file");
+    let rules = fs::read_to_string("./rules/go.scm").expect("Unable to read file");
 
     let query = Query::new(go_lang, &rules).expect("Error loading query");
     let mut query_cursor = QueryCursor::new();
