@@ -2,6 +2,10 @@ use std::fs;
 use human_panic::setup_panic;
 use tree_sitter::{Parser, Query, QueryCursor};
 
+
+mod types;
+use types::{Token, Location};
+
 fn main() {
     setup_panic!();
 
@@ -33,8 +37,18 @@ fn main() {
             let range = capture.node.range();
             let text = &code[range.start_byte..range.end_byte];
             let line = range.start_point.row;
-            let col = range.start_point.column;
-            println!("[Line: {}, Col: {}] Found flagKey: `{}`", line, col, text);
+            let column = range.start_point.column;
+
+            let _t = Token {
+                key: text.to_string(),
+                location: Location {
+                    file: "basic.go".to_string(),
+                    line,
+                    column,
+                },
+            };
+
+            println!("[Line: {}, Col: {}] Found flagKey: `{}`", line, column, text);
         }
     }
 }
