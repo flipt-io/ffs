@@ -1,34 +1,58 @@
-use std::fs;
+use clap::Parser;
 use human_panic::setup_panic;
-use tree_sitter::{Parser, Query, QueryCursor};
-
+use std::{fmt, fs};
+use tree_sitter::{Query, QueryCursor};
 
 mod types;
-use types::{Token, Location};
+use types::{Location, Token};
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, value_enum)]
+    language: Language,
+    #[arg(short, long)]
+    input: String,
+}
+
+#[derive(clap::ValueEnum, Clone, Debug)]
+enum Language {
+    Go,
+}
+
+impl fmt::Display for Language {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Language::Go => write!(f, "go"),
+        }
+    }
+}
 
 fn main() {
     setup_panic!();
 
-    let code = fs::read_to_string("./examples/go/basic.go").expect("Unable to read file");
+    let args = Args::parse();
 
-    let mut parser = Parser::new();
+    let mut parser = tree_sitter::Parser::new();
 
-    let go_lang = tree_sitter_go::language();
-    parser
-        .set_language(go_lang)
-        .expect("Error loading Go grammar");
+    let lang = match args.language {
+        Language::Go => tree_sitter_go::language(),
+    };
 
+    parser.set_language(lang).expect("Error loading grammar");
+
+    let code = fs::read_to_string(&args.input).expect("Unable to read file");
     let parsed = parser.parse(&code, None).expect("Error parsing code");
 
-    let rules = fs::read_to_string("./rules/go.scm").expect("Unable to read file");
+    let rules =
+        fs::read_to_string(format!("./rules/{}.scm", args.language)).expect("Unable to read file");
 
-    let query = Query::new(go_lang, &rules).expect("Error loading query");
+    let query = Query::new(lang, &rules).expect("Error loading query");
     let mut query_cursor = QueryCursor::new();
     let all_matches = query_cursor.matches(&query, parsed.root_node(), code.as_bytes());
     let flag_key_idx = query.capture_index_for_name("v").unwrap();
 
     for each_match in all_matches {
-        // iterate over all captures called "raise"
         for capture in each_match
             .captures
             .iter()
@@ -39,16 +63,16 @@ fn main() {
             let line = range.start_point.row;
             let column = range.start_point.column;
 
-            let _t = Token {
+            let t = Token {
                 key: text.to_string(),
                 location: Location {
-                    file: "basic.go".to_string(),
+                    file: args.input.to_string(),
                     line,
                     column,
                 },
             };
 
-            println!("[Line: {}, Col: {}] Found flagKey: `{}`", line, column, text);
+            println!("{}", t);
         }
     }
 }

@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Token {
     pub key: String,
     pub location: Location,
@@ -13,6 +14,7 @@ impl std::fmt::Display for Token {
     }
 }
 
+#[derive(Debug)]
 pub struct Location {
     pub file: String,
     pub line: usize,
