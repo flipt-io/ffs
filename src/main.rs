@@ -11,19 +11,21 @@ use types::{Location, Token};
 struct Args {
     #[arg(short, long, value_enum)]
     language: Language,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Path to input file")]
     input: String,
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 enum Language {
     Go,
+    Rust,
 }
 
 impl fmt::Display for Language {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Language::Go => write!(f, "go"),
+            Language::Rust => write!(f, "rust"),
         }
     }
 }
@@ -37,6 +39,7 @@ fn main() {
 
     let lang = match args.language {
         Language::Go => tree_sitter_go::language(),
+        Language::Rust => tree_sitter_rust::language(),
     };
 
     parser.set_language(lang).expect("Error loading grammar");
