@@ -4,11 +4,28 @@
 
 - Rust - [install](https://rustup.rs/)
 
+## Usage
+
+```console
+A CLI tool to find Flipt feature flags in code
+
+Usage: ffs [OPTIONS] --language <LANGUAGE> --input <INPUT>
+
+Options:
+  -l, --language <LANGUAGE>  [possible values: go, rust]
+  -i, --input <INPUT>        Path to input file
+  -o, --output <OUTPUT>      Path to output file (default STDOUT)
+  -h, --help                 Print help
+  -V, --version              Print version
+```
+
 ## Building/Running
 
 ### Running Debug
 
-`$ cargo run .`
+With args:
+
+`$ cargo run -- -l go --input ./examples/go/basic.go`
 
 ### Building Binary
 
@@ -25,7 +42,7 @@ It accomplishes this by:
 
 1. Using the [Rust tree-sitter bindings](https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_rust) and [Go tree-sitter grammar](https://github.com/tree-sitter/tree-sitter-go) to build a syntax tree of a Go file.
 
-IE: Given the following Go code:
+Given the following Go code:
 
 ```go
 resp, err := s.Evaluate(context.TODO(), &flipt.EvaluationRequest{

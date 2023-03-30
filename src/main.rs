@@ -83,7 +83,7 @@ fn main() {
             };
 
             let json = serde_json::to_string(&t).unwrap();
-            writeln!(out_writer, "{}", json).unwrap();
+            writeln!(out_writer, "{json}").unwrap();
         }
     }
 }
