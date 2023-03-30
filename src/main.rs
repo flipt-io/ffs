@@ -13,6 +13,8 @@ struct Args {
     language: Language,
     #[arg(short, long, help = "Path to input file")]
     input: String,
+    #[arg(short, long, help = "Path to output file")]
+    output: Option<String>,
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]
@@ -40,6 +42,11 @@ fn main() {
     let lang = match args.language {
         Language::Go => tree_sitter_go::language(),
         Language::Rust => tree_sitter_rust::language(),
+    };
+
+    let mut out_writer: Box<dyn std::io::Write> = match args.output {
+        Some(s) => Box::new(std::fs::File::create(s).unwrap()),
+        None => Box::new(std::io::stdout()),
     };
 
     parser.set_language(lang).expect("Error loading grammar");
@@ -75,7 +82,8 @@ fn main() {
                 },
             };
 
-            println!("{}", t);
+            let json = serde_json::to_string(&t).unwrap();
+            writeln!(out_writer, "{}", json).unwrap();
         }
     }
 }
