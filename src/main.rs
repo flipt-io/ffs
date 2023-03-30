@@ -1,3 +1,4 @@
+use anyhow::Result;
 use clap::Parser;
 use human_panic::setup_panic;
 use std::{fmt, fs};
@@ -13,7 +14,7 @@ struct Args {
     language: Language,
     #[arg(short, long, help = "Path to input file")]
     input: String,
-    #[arg(short, long, help = "Path to output file")]
+    #[arg(short, long, help = "Path to output file (default STDOUT)")]
     output: Option<String>,
 }
 
@@ -32,7 +33,7 @@ impl fmt::Display for Language {
     }
 }
 
-fn main() {
+fn main() -> Result<()> {
     setup_panic!();
 
     let args = Args::parse();
@@ -45,7 +46,7 @@ fn main() {
     };
 
     let mut out_writer: Box<dyn std::io::Write> = match args.output {
-        Some(s) => Box::new(std::fs::File::create(s).unwrap()),
+        Some(s) => Box::new(std::fs::File::create(s)?),
         None => Box::new(std::io::stdout()),
     };
 
@@ -82,8 +83,10 @@ fn main() {
                 },
             };
 
-            let json = serde_json::to_string(&t).unwrap();
-            writeln!(out_writer, "{json}").unwrap();
+            let json = serde_json::to_string(&t)?;
+            writeln!(out_writer, "{json}")?;
         }
     }
+
+    Ok(())
 }
