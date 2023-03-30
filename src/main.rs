@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
 use std::{fmt, fs};
@@ -38,27 +38,31 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let mut parser = tree_sitter::Parser::new();
-
-    let lang = match args.language {
-        Language::Go => tree_sitter_go::language(),
-        Language::Rust => tree_sitter_rust::language(),
-    };
-
     let mut out_writer: Box<dyn std::io::Write> = match args.output {
         Some(s) => Box::new(std::fs::File::create(s)?),
         None => Box::new(std::io::stdout()),
     };
 
-    parser.set_language(lang).expect("Error loading grammar");
-
-    let code = fs::read_to_string(&args.input).expect("Unable to read file");
-    let parsed = parser.parse(&code, None).expect("Error parsing code");
-
     let rules =
         fs::read_to_string(format!("./rules/{}.scm", args.language)).expect("Unable to read file");
 
-    let query = Query::new(lang, &rules).expect("Error loading query");
+    parse(&args.input, &args.language, &rules, &mut out_writer)
+}
+
+fn parse(input: &str, lang: &Language, rules: &str, mut writer: impl std::io::Write) -> Result<()> {
+    let mut parser = tree_sitter::Parser::new();
+
+    let ll = match lang {
+        Language::Go => tree_sitter_go::language(),
+        Language::Rust => tree_sitter_rust::language(),
+    };
+
+    parser.set_language(ll).expect("Error loading grammar");
+
+    let code = fs::read_to_string(input).expect("Unable to read file");
+    let parsed = parser.parse(&code, None).expect("Error parsing code");
+
+    let query = Query::new(ll, rules).expect("Error loading query");
     let mut query_cursor = QueryCursor::new();
     let all_matches = query_cursor.matches(&query, parsed.root_node(), code.as_bytes());
     let flag_key_idx = query.capture_index_for_name("v").unwrap();
@@ -77,14 +81,14 @@ fn main() -> Result<()> {
             let t = Token {
                 key: text.to_string(),
                 location: Location {
-                    file: args.input.to_string(),
+                    file: input.to_string(),
                     line,
                     column,
                 },
             };
 
             let json = serde_json::to_string(&t)?;
-            writeln!(out_writer, "{json}")?;
+            writeln!(writer, "{json}")?;
         }
     }
 
