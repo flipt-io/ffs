@@ -46,23 +46,22 @@ fn main() -> Result<()> {
     let rules =
         fs::read_to_string(format!("./rules/{}.scm", args.language)).expect("Unable to read file");
 
-    parse(&args.input, &args.language, &rules, &mut out_writer)
-}
-
-fn parse(input: &str, lang: &Language, rules: &str, mut writer: impl std::io::Write) -> Result<()> {
-    let mut parser = tree_sitter::Parser::new();
-
-    let ll = match lang {
+    let ll = match args.language {
         Language::Go => tree_sitter_go::language(),
         Language::Rust => tree_sitter_rust::language(),
     };
 
+    let mut parser = tree_sitter::Parser::new();
     parser.set_language(ll).expect("Error loading grammar");
+    let query = Query::new(ll, &rules).expect("Error loading query");
+    
+    parse_file(&args.input, &mut parser, &query, &mut out_writer)
+}
 
+fn parse_file(input: &str, parser: &mut tree_sitter::Parser, query: &tree_sitter::Query, mut writer: impl std::io::Write) -> Result<()> {
     let code = fs::read_to_string(input).expect("Unable to read file");
     let parsed = parser.parse(&code, None).expect("Error parsing code");
 
-    let query = Query::new(ll, rules).expect("Error loading query");
     let mut query_cursor = QueryCursor::new();
     let all_matches = query_cursor.matches(&query, parsed.root_node(), code.as_bytes());
     let flag_key_idx = query.capture_index_for_name("v").unwrap();
