@@ -11,7 +11,7 @@ fn main() {
                 String::from("name"),
                 String::from("brett"),
             )]),
-            flag_key: flag_key.into(),
+            flag_key: "foo",
             ..Default::default()
         });
 }

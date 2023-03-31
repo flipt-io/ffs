@@ -14,7 +14,7 @@
       body: (_
        (field_initializer 
          name: (_) @k (#eq? @k "flag_key")
-         value: (_) @v
+         value: (string_literal) @v
        )
      )
 	  )
