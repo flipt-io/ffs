@@ -1,14 +1,11 @@
-use crate::types::{
-    language::{Language, SupportedLanguage},
-    Token,
-};
+use crate::types::language::{Language, SupportedLanguage};
+use crate::types::token::{Location, Token};
 use anyhow::{Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
 use std::collections::HashMap;
 use std::fs;
 use tree_sitter::{Query, QueryCursor};
-use types::Location;
 use walkdir::{DirEntry, WalkDir};
 mod types;
 
