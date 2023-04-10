@@ -1,38 +1,26 @@
+use crate::types::{
+    language::{Language, SupportedLanguage},
+    Token,
+};
 use anyhow::{Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
 use std::collections::HashMap;
-use std::{fmt, fs};
+use std::fs;
 use tree_sitter::{Query, QueryCursor};
-use walkdir::{DirEntry, WalkDir};
-
-mod types;
 use types::Location;
+use walkdir::{DirEntry, WalkDir};
+mod types;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long, value_enum)]
-    language: Language,
+    language: SupportedLanguage,
     #[arg(short, long, help = "Path to output file (default STDOUT)")]
     output: Option<String>,
     #[arg(short, long, help = "Path to directory to scan (default .)")]
     directory: Option<String>,
-}
-
-#[derive(clap::ValueEnum, Clone, Debug)]
-enum Language {
-    Go,
-    Rust,
-}
-
-impl fmt::Display for Language {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Language::Go => write!(f, "go"),
-            Language::Rust => write!(f, "rust"),
-        }
-    }
 }
 
 fn main() -> Result<()> {
@@ -53,14 +41,13 @@ fn main() -> Result<()> {
     let rules =
         fs::read_to_string(format!("./rules/{}.scm", args.language)).expect("Unable to read file");
 
-    let ll = match args.language {
-        Language::Go => tree_sitter_go::language(),
-        Language::Rust => tree_sitter_rust::language(),
-    };
+    let ll = Language::from(args.language.to_string());
 
     let mut parser = tree_sitter::Parser::new();
-    parser.set_language(ll).expect("Error loading grammar");
-    let query = Query::new(ll, &rules).expect("Error loading query");
+    parser
+        .set_language(ll.tree_sitter)
+        .expect("Error loading grammar");
+    let query = Query::new(ll.tree_sitter, &rules).expect("Error loading query");
 
     // create hashmap of keys to Locations
     let mut locations = HashMap::new();
@@ -69,7 +56,7 @@ fn main() -> Result<()> {
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
-        .filter(is_go_file)
+        .filter(|e| is_file_ext(e, &ll.file_extension))
     {
         let path = entry.path().to_str().unwrap();
         parse_file(path, &mut parser, &query, &mut locations)?;
@@ -77,19 +64,24 @@ fn main() -> Result<()> {
 
     for (k, v) in locations {
         for loc in v {
-            writeln!(out_writer, "{}: {}", k, loc)?;
+            let t = Token {
+                key: k.to_string(),
+                loc,
+            };
+
+            let json = serde_json::to_string(&t)?;
+            writeln!(out_writer, "{json}")?;
         }
     }
 
     Ok(())
 }
 
-// TODO: make this generic
-fn is_go_file(entry: &DirEntry) -> bool {
+fn is_file_ext(entry: &DirEntry, ext: &str) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.ends_with(".go"))
+        .map(|s| s.ends_with(ext))
         .unwrap_or(false)
 }
 
@@ -103,7 +95,7 @@ fn parse_file(
     let parsed = parser.parse(&code, None).expect("Error parsing code");
 
     let mut query_cursor = QueryCursor::new();
-    let all_matches = query_cursor.matches(&query, parsed.root_node(), code.as_bytes());
+    let all_matches = query_cursor.matches(query, parsed.root_node(), code.as_bytes());
     let flag_key_idx = query.capture_index_for_name("v").unwrap();
 
     for each_match in all_matches {

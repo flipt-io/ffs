@@ -11,6 +11,7 @@ store.On("GetFlag", mock.Anything, mock.Anything, "foo").Return(enabledFlag, nil
 
 store.On("GetEvaluationRules", mock.Anything, mock.Anything, "foo").Return([]*storage.EvaluationRule{}, nil)
 
+// this is a comment that mentions the flagKey 'foo' but should not be included in the output
 resp, err := s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
 	EntityId: "1",
 	FlagKey:  "foo",
