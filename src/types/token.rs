@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -30,3 +32,5 @@ impl std::fmt::Display for Location {
         )
     }
 }
+
+pub type TokenSet = HashMap<String, Vec<Location>>;

@@ -1,6 +1,5 @@
-use crate::types::args::Args;
-use crate::types::language::Language;
-use crate::types::token::{Location, Token};
+use crate::types::language::{Language, SupportedLanguage};
+use crate::types::token::{Location, Token, TokenSet};
 use anyhow::{Ok, Result};
 use std::collections::HashMap;
 use std::fs;
@@ -9,34 +8,59 @@ use walkdir::{DirEntry, WalkDir};
 
 pub mod types;
 
-pub struct FFS {
-    args: Args,
-    tokens: HashMap<String, Vec<Location>>,
+pub struct Writer {
+    output: Option<String>,
 }
 
-impl FFS {
-    pub fn new(args: Args) -> Self {
-        FFS {
-            args,
-            tokens: HashMap::new(),
-        }
+impl Writer {
+    pub fn new(output: Option<String>) -> Self {
+        Writer { output }
     }
 
-    pub fn execute(&mut self) -> Result<()> {
-        let mut out_writer: Box<dyn std::io::Write> = match &self.args.output {
+    pub fn write(&self, tokens: TokenSet) -> Result<()> {
+        let mut out_writer: Box<dyn std::io::Write> = match &self.output {
             Some(s) => Box::new(std::fs::File::create(s)?),
             None => Box::new(std::io::stdout()),
         };
 
-        let dir = match self.args.directory.to_owned() {
+        for (k, v) in &tokens {
+            for loc in v {
+                let t = Token {
+                    key: k.to_string(),
+                    loc: loc.clone(),
+                };
+
+                let json = serde_json::to_string(&t)?;
+                writeln!(out_writer, "{json}")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+pub struct FFS {
+    language: SupportedLanguage,
+    dir: Option<String>,
+}
+
+impl FFS {
+    pub fn new(language: SupportedLanguage, dir: Option<String>) -> Self {
+        FFS { language, dir }
+    }
+
+    /// Scan the directory for files for the given language and find all flag keys along with their locations.
+    pub fn scan(&mut self) -> Result<TokenSet> {
+        let mut tokens: TokenSet = HashMap::new();
+
+        let dir = match self.dir.to_owned() {
             Some(s) => s,
             None => ".".to_string(),
         };
 
-        let rules = fs::read_to_string(format!("./rules/{}.scm", self.args.language))
+        let rules = fs::read_to_string(format!("./rules/{}.scm", self.language))
             .expect("Unable to read file");
 
-        let ll = Language::from(self.args.language.to_string());
+        let ll = Language::from(self.language.to_string());
 
         let mut parser = tree_sitter::Parser::new();
         parser
@@ -51,22 +75,10 @@ impl FFS {
             .filter(|e| is_file_ext(e, &ll.file_extension))
         {
             let path = entry.path().to_str().unwrap();
-            let tokens = &mut self.tokens;
-            parse_file(path, &mut parser, &query, tokens)?;
+            parse_file(path, &mut parser, &query, &mut tokens)?;
         }
 
-        for (k, v) in &self.tokens {
-            for loc in v {
-                let t = Token {
-                    key: k.to_string(),
-                    loc: loc.clone(),
-                };
-
-                let json = serde_json::to_string(&t)?;
-                writeln!(out_writer, "{json}")?;
-            }
-        }
-        Ok(())
+        Ok(tokens)
     }
 }
 

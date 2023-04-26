@@ -10,6 +10,11 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    FFS::new(args).execute()?;
+    let mut ffs = FFS::new(args.language, args.dir);
+    let tokens = ffs.scan()?;
+    let writer = ffs::Writer::new(args.output);
+
+    writer.write(tokens)?;
+
     Ok(())
 }
