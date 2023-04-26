@@ -3,13 +3,14 @@ use clap::Parser;
 use human_panic::setup_panic;
 
 use crate::{
-    ffs::{scanner::Scanner, writer::Writer},
+    ffs::{query::Querier, scanner::Scanner, writer::Writer},
     types::args::Args,
 };
 mod ffs;
 mod types;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     setup_panic!();
 
     let args = Args::parse();
@@ -18,7 +19,19 @@ fn main() -> Result<()> {
     let tokens = ffs.scan()?;
     let writer = Writer::new(args.output);
 
-    writer.write(tokens)?;
+    writer.write(&tokens)?;
+
+    flipt::meta::MetaClient::new(flipt::Config::default())?
+        .info()
+        .get()
+        .await?;
+
+    let flipt_client = flipt::api::ApiClient::new(flipt::Config::default())?;
+
+    let querier = Querier::new(flipt_client.flags());
+    for k in tokens.keys() {
+        querier.query(k).await?;
+    }
 
     Ok(())
 }

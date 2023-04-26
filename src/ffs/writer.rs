@@ -10,13 +10,13 @@ impl Writer {
         Writer { output }
     }
 
-    pub fn write(&self, tokens: TokenSet) -> Result<()> {
+    pub fn write(&self, tokens: &TokenSet) -> Result<()> {
         let mut out_writer: Box<dyn std::io::Write> = match &self.output {
             Some(s) => Box::new(std::fs::File::create(s)?),
             None => Box::new(std::io::stdout()),
         };
 
-        for (k, v) in &tokens {
+        for (k, v) in tokens {
             for loc in v {
                 let t = Token {
                     key: k.to_string(),
