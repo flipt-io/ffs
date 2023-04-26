@@ -10,7 +10,6 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    FFS::new(args).execute();
-
+    FFS::new(args).execute()?;
     Ok(())
 }
