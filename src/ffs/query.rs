@@ -1,5 +1,6 @@
 use anyhow::Result;
 use flipt::api::flag::{FlagClient, FlagGetRequest};
+
 pub struct Querier<'a> {
     client: FlagClient<'a>,
 }
