@@ -3,10 +3,7 @@ use clap::Parser;
 use human_panic::setup_panic;
 use types::token::{Token, TokenSet};
 
-use crate::{
-    ffs::{query::Querier, scanner::Scanner},
-    types::args::Args,
-};
+use crate::{ffs::scanner::Scanner, types::args::Args};
 mod ffs;
 mod types;
 
@@ -26,9 +23,14 @@ async fn main() -> Result<()> {
 
     let flipt_client = flipt::api::ApiClient::new(flipt::Config::default())?;
 
-    let querier = Querier::new(flipt_client.flags());
     for k in tokens.keys() {
-        querier.query(k).await?;
+        flipt_client
+            .flags()
+            .get(&flipt::api::flag::FlagGetRequest {
+                namespace_key: None,
+                key: k.to_string(),
+            })
+            .await?;
     }
 
     Ok(())
