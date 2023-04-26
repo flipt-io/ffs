@@ -1,8 +1,12 @@
 use anyhow::{Ok, Result};
 use clap::Parser;
-use ffs::types::args::Args;
-use ffs::FFS;
 use human_panic::setup_panic;
+
+use crate::{
+    ffs::{scanner::Scanner, writer::Writer},
+    types::args::Args,
+};
+mod ffs;
 mod types;
 
 fn main() -> Result<()> {
@@ -10,9 +14,9 @@ fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let mut ffs = FFS::new(args.language, args.dir);
+    let mut ffs = Scanner::new(args.language, args.dir);
     let tokens = ffs.scan()?;
-    let writer = ffs::Writer::new(args.output);
+    let writer = Writer::new(args.output);
 
     writer.write(tokens)?;
 
