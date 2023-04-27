@@ -1,17 +1,20 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Token {
+pub struct Flag {
+    pub namespace_key: String,
     pub key: String,
     pub loc: Location,
 }
 
-impl std::fmt::Display for Token {
+impl std::fmt::Display for Flag {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Key: {} [{}]", self.key, self.loc)
+        write!(
+            f,
+            "Namespace: {} Key: {} [{}]",
+            self.namespace_key, self.key, self.loc
+        )
     }
 }
 
@@ -32,5 +35,3 @@ impl std::fmt::Display for Location {
         )
     }
 }
-
-pub type TokenSet = HashMap<String, Vec<Location>>;
