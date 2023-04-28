@@ -5,9 +5,9 @@
       operand: (_
         body: (_ 
           (keyed_element
-            (field_identifier)? @_namespaceKey (#match? @_namespaceKey "NamespaceKey")
+            (field_identifier) @_namespaceKey (#match? @_namespaceKey "NamespaceKey")
             (interpreted_string_literal) @namespaceValue
-          )
+          )?
           (keyed_element
             (field_identifier) @_flagKey (#match? @_flagKey "(Key|FlagKey)")
             (interpreted_string_literal) @flagValue

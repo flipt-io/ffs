@@ -3,6 +3,7 @@ use crate::types::{
     language::{Language, SupportedLanguage},
 };
 use anyhow::{Ok, Result};
+use snailquote::unescape;
 use std::fs;
 use tree_sitter::{Query, QueryCursor};
 use walkdir::{DirEntry, WalkDir};
@@ -65,25 +66,19 @@ impl Scanner {
                         .captures
                         .iter()
                         .find(|c| c.index == namespace_index)
-                        .unwrap()
-                        .node
-                        .utf8_text(code.as_bytes())
-                        .unwrap_or("default");
+                        .and_then(|f| f.node.utf8_text(code.as_bytes()).ok());
 
                     let flag_key = each_match
                         .captures
                         .iter()
                         .find(|c| c.index == flag_index)
-                        .unwrap()
-                        .node
-                        .utf8_text(code.as_bytes())
-                        .unwrap_or_default();
+                        .and_then(|f| f.node.utf8_text(code.as_bytes()).ok());
 
                     let range = capture.node.range();
 
                     let flag = Flag {
-                        namespace_key: namespace_key.to_string(),
-                        key: flag_key.to_string(),
+                        namespace_key: unescape(namespace_key.unwrap_or("default")).unwrap(),
+                        key: unescape(flag_key.unwrap()).unwrap(),
                         loc: Location {
                             file: path.to_string(),
                             line: range.start_point.row,
