@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
             acc
         });
 
-    let flipt_config = flipt::Config::default();
+    let flipt_config = flipt::Config::new_from_env().unwrap_or_default();
 
     // checks if the flipt server is up and running
     flipt::meta::MetaClient::new(flipt_config.clone())?
