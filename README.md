@@ -19,7 +19,7 @@ Options:
   -V, --version              Print version
 ```
 
-## Building/Running
+## Building/Running Locally
 
 ### Running Debug
 
@@ -77,3 +77,22 @@ It does this by:
 ```
 
 4. An exit code of `1` is returned if any flags are found in code that are not found in the API, otherwise `0` is returned.
+
+## Releasing
+
+### Cross Compiling
+
+#### MacOS
+
+1. For building the binary for Linux on MacOS, you'll need to install the `musl-cross` toolchain:
+
+```console
+brew install FiloSottile/musl-cross/musl-cross
+rustup target add x86_64-unknown-linux-musl
+```
+
+2. Then you can build the binary for Linux:
+
+```console
+TARGET_CC=x86_64-linux-musl-gcc cargo build --release --target x86_64-unknown-linux-musl
+```
