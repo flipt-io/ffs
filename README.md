@@ -31,9 +31,20 @@ With args:
 
 `$ cargo build`
 
+## Limitations
+
+- Currently only supports parsing Go code.
+
 ## How it Works
 
-It currently only supports parsing Go code to look for instances of the following method calls:
+Currently, the CLI tool is split into two parts:
+
+- Parsing
+- Validation
+
+### Parsing
+
+The parsing step look for instances of the following method calls:
 
 - `GetFlag`
 - `Evaluate`
@@ -46,7 +57,17 @@ It accomplishes this by:
 The query rules are written as an S-Expression: [go.scm](./rules/go.scm)
 
 3. It checks the values of the captured values, which should contain the matching `Key` or `FlagKey`, and `NamespaceKey` values.
-4. Finally, it captures the filename and location of the code and outputs the results to STDOUT or optionally to a file.
+4. Finally, it captures the filename and location of the code.
+
+### Validation
+
+The tool takes output of the parser step and validates the results against the Flipt API.
+
+It does this by:
+
+1. Fetching the list of all flags from the Flipt API for the given namespace. It defaults to trying to access Flipt at `http://localhost:8080` but can be configured with the `FLIPT_ENDPOINT` environment variable.
+2. It then checks the results of the parser against the list of flags returned from the API.
+3. For each flag in code that is not found in the API, it will write the output to `STDOUT` and optionally a file of where the missing flag was found in code.
 
 ```json
 {"namespaceKey":"default","flagKey":"foo","location":{"file":"./examples/go/basic.go","startLine":14,"startColumn":64,"endLine":21,"endColumn":1}}
@@ -54,3 +75,5 @@ The query rules are written as an S-Expression: [go.scm](./rules/go.scm)
 {"namespaceKey":"default","flagKey":"boz","location":{"file":"./examples/go/basic.go","startLine":32,"startColumn":63,"endLine":39,"endColumn":1}}
 {"namespaceKey":"default","flagKey":"foo","location":{"file":"./examples/go/basic.go","startLine":41,"startColumn":60,"endLine":43,"endColumn":1}}
 ```
+
+4. An exit code of `1` is returned if any flags are found in code that are not found in the API, otherwise `0` is returned.

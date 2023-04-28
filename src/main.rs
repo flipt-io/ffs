@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, process::ExitCode};
 
-use anyhow::{bail, Ok, Result};
+use anyhow::{Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
 
@@ -12,7 +12,7 @@ mod ffs;
 mod types;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<ExitCode> {
     setup_panic!();
 
     let args = Args::parse();
@@ -76,8 +76,8 @@ async fn main() -> Result<()> {
     }
 
     if !missing_flags.is_empty() {
-        bail!("Found {} missing flags", missing_flags.len());
+        return Ok(ExitCode::FAILURE);
     }
 
-    Ok(())
+    Ok(ExitCode::SUCCESS)
 }
