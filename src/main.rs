@@ -4,7 +4,10 @@ use anyhow::{bail, Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
 
-use crate::{ffs::scanner::Scanner, types::args::Args};
+use crate::{
+    ffs::scanner::Scanner,
+    types::{args::Args, flag::Flag},
+};
 mod ffs;
 mod types;
 
@@ -16,13 +19,18 @@ async fn main() -> Result<()> {
 
     let mut ffs = Scanner::new(args.language, args.dir);
 
-    let found_flags_set: HashMap<_, _> = ffs
-        .scan()?
+    let found_flags = ffs.scan()?;
+
+    let found_flags_set: HashMap<String, Vec<Flag>> = found_flags
         .iter()
         .cloned()
         .filter(|f| f.namespace_key == args.namespace.clone().unwrap_or("default".to_string()))
-        .map(|f| (f.flag_key.clone(), f))
-        .collect();
+        .fold(HashMap::new(), |mut acc, f| {
+            acc.entry(f.flag_key.clone())
+                .or_insert_with(Vec::new)
+                .push(f);
+            acc
+        });
 
     let flipt_config = flipt::Config::default();
 
@@ -54,12 +62,12 @@ async fn main() -> Result<()> {
         None => Box::new(std::io::stdout()),
     };
 
-    // get collection of found flags that do not existing in flipt
-    let missing_flags = found_flags_set
+    // get collection of found flags and their locations in code that do not existing in flipt
+    let missing_flags: Vec<_> = found_flags_set
         .iter()
         .filter(|(k, _)| !existing_flags_set.contains_key(k.as_str()))
-        .map(|(_, v)| v)
-        .collect::<Vec<_>>();
+        .flat_map(|(_, v)| v)
+        .collect();
 
     // ensure all found flags exist in flipt, write to output if not
     for flag in &missing_flags {
