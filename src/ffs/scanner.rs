@@ -1,7 +1,9 @@
-use crate::types::language::{Language, SupportedLanguage};
-use crate::types::token::{Location, TokenSet};
+use crate::types::{
+    flag::{Flag, Location},
+    language::{Language, SupportedLanguage},
+};
 use anyhow::{Ok, Result};
-use std::collections::HashMap;
+use snailquote::unescape;
 use std::fs;
 use tree_sitter::{Query, QueryCursor};
 use walkdir::{DirEntry, WalkDir};
@@ -17,8 +19,8 @@ impl Scanner {
     }
 
     /// Scan the directory for files for the given language and find all flag keys along with their locations.
-    pub fn scan(&mut self) -> Result<TokenSet> {
-        let mut tokens: TokenSet = HashMap::new();
+    pub fn scan(&mut self) -> Result<Vec<Flag>> {
+        let mut flags = Vec::new();
 
         let dir = match self.dir.to_owned() {
             Some(s) => s,
@@ -43,10 +45,53 @@ impl Scanner {
             .filter(|e| is_file_ext(e, &ll.file_extension))
         {
             let path = entry.path().to_str().unwrap();
-            parse_file(path, &mut parser, &query, &mut tokens)?;
+
+            let code = fs::read_to_string(path).expect("Unable to read file");
+            let parsed = parser.parse(&code, None).expect("Error parsing code");
+
+            let mut query_cursor = QueryCursor::new();
+            let fn_arg_index = query.capture_index_for_name("arg").unwrap();
+            let namespace_index = query.capture_index_for_name("namespaceValue").unwrap();
+            let flag_index = query.capture_index_for_name("flagValue").unwrap();
+
+            for each_match in query_cursor.matches(&query, parsed.root_node(), code.as_bytes()) {
+                for capture in each_match
+                    .captures
+                    .iter()
+                    .filter(|c| c.index == fn_arg_index)
+                {
+                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
+                    let namespace_key = each_match
+                        .captures
+                        .iter()
+                        .find(|c| c.index == namespace_index)
+                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
+
+                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
+                    let flag_key = each_match
+                        .captures
+                        .iter()
+                        .find(|c| c.index == flag_index)
+                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
+
+                    let range = capture.node.range();
+
+                    flags.push(Flag {
+                        namespace_key: unescape(namespace_key.unwrap_or("default")).unwrap(),
+                        flag_key: unescape(flag_key.unwrap()).unwrap(),
+                        location: Location {
+                            file: path.to_string(),
+                            start_line: range.start_point.row,
+                            start_column: range.start_point.column,
+                            end_line: range.end_point.row,
+                            end_column: range.end_point.column,
+                        },
+                    });
+                }
+            }
         }
 
-        Ok(tokens)
+        Ok(flags)
     }
 }
 
@@ -56,41 +101,4 @@ fn is_file_ext(entry: &DirEntry, ext: &str) -> bool {
         .to_str()
         .map(|s| s.ends_with(ext))
         .unwrap_or(false)
-}
-
-fn parse_file(
-    input: &str,
-    parser: &mut tree_sitter::Parser,
-    query: &tree_sitter::Query,
-    col: &mut HashMap<String, Vec<Location>>,
-) -> Result<()> {
-    let code = fs::read_to_string(input).expect("Unable to read file");
-    let parsed = parser.parse(&code, None).expect("Error parsing code");
-
-    let mut query_cursor = QueryCursor::new();
-    let all_matches = query_cursor.matches(query, parsed.root_node(), code.as_bytes());
-    let flag_key_idx = query.capture_index_for_name("v").unwrap();
-
-    for each_match in all_matches {
-        for capture in each_match
-            .captures
-            .iter()
-            .filter(|c| c.index == flag_key_idx)
-        {
-            let range = capture.node.range();
-            let text = &code[range.start_byte..range.end_byte];
-            let line = range.start_point.row;
-            let column = range.start_point.column;
-
-            let loc = Location {
-                file: input.to_string(),
-                line,
-                column,
-            };
-
-            col.entry(text.to_string()).or_default().push(loc);
-        }
-    }
-
-    Ok(())
 }

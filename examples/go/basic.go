@@ -13,24 +13,27 @@ store.On("GetEvaluationRules", mock.Anything, mock.Anything, "foo").Return([]*st
 
 // this is a comment that mentions the flagKey 'foo' but should not be included in the output
 resp, err := s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId: "1",
-	FlagKey:  "foo",
+	EntityId:     "1",
+	NamespaceKey: "default",
+	FlagKey:      "foo",
 	Context: map[string]string{
 		"bar": "boz",
 	},
 })
 
 resp, err = s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId: "1",
-	FlagKey:  "bar",
+	EntityId:     "1",
+	NamespaceKey: "production",
+	FlagKey:      "bar",
 	Context: map[string]string{
 		"bar": "boz",
 	},
 })
 
 resp, err = s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId: "1",
-	FlagKey:  "boz",
+	EntityId:     "1",
+	NamespaceKey: "default",
+	FlagKey:      "boz",
 	Context: map[string]string{
 		"bar": "boz",
 	},
