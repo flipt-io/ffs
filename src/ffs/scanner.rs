@@ -62,17 +62,19 @@ impl Scanner {
                     let namespace_index = query.capture_index_for_name("namespaceValue").unwrap();
                     let flag_index = query.capture_index_for_name("flagValue").unwrap();
 
+                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
                     let namespace_key = each_match
                         .captures
                         .iter()
                         .find(|c| c.index == namespace_index)
-                        .and_then(|f| f.node.utf8_text(code.as_bytes()).ok());
+                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
 
+                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
                     let flag_key = each_match
                         .captures
                         .iter()
                         .find(|c| c.index == flag_index)
-                        .and_then(|f| f.node.utf8_text(code.as_bytes()).ok());
+                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
 
                     let range = capture.node.range();
 
