@@ -6,13 +6,13 @@
         body: (_ 
           (keyed_element
             (field_identifier) @_namespaceKey (#match? @_namespaceKey "NamespaceKey")
-            (interpreted_string_literal) @namespaceValue
+            (interpreted_string_literal) @namespace
           )?
           (keyed_element
             (field_identifier) @_flagKey (#match? @_flagKey "(Key|FlagKey)")
-            (interpreted_string_literal) @flagValue
+            (interpreted_string_literal) @flag
           )
-        ) @arg
+        ) 
       ) 
     ) 
   )
