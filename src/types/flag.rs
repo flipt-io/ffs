@@ -4,16 +4,16 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Flag {
     pub namespace_key: String,
-    pub key: String,
-    pub loc: Location,
+    pub flag_key: String,
+    pub location: Location,
 }
 
 impl std::fmt::Display for Flag {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Namespace: {} Key: {} [{}]",
-            self.namespace_key, self.key, self.loc
+            "namespace_key: {} flag_key: {} [{}]",
+            self.namespace_key, self.flag_key, self.location
         )
     }
 }
@@ -30,7 +30,7 @@ impl std::fmt::Display for Location {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "File: {} [Line: {}, Col: {}]",
+            "file: {} [line: {}, col: {}]",
             self.file, self.line, self.column
         )
     }

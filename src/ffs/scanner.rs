@@ -78,8 +78,8 @@ impl Scanner {
 
                     let flag = Flag {
                         namespace_key: unescape(namespace_key.unwrap_or("default")).unwrap(),
-                        key: unescape(flag_key.unwrap()).unwrap(),
-                        loc: Location {
+                        flag_key: unescape(flag_key.unwrap()).unwrap(),
+                        location: Location {
                             file: path.to_string(),
                             line: range.start_point.row,
                             column: range.start_point.column,
