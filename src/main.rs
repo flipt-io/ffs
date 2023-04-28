@@ -1,50 +1,74 @@
-use anyhow::{Ok, Result};
+use std::collections::HashMap;
+
+use anyhow::{bail, Ok, Result};
 use clap::Parser;
 use human_panic::setup_panic;
-use types::flag::Flag;
 
 use crate::{ffs::scanner::Scanner, types::args::Args};
 mod ffs;
 mod types;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     setup_panic!();
 
     let args = Args::parse();
 
     let mut ffs = Scanner::new(args.language, args.dir);
-    let flags = ffs.scan()?;
-    write_output(flags, args.output)?;
 
-    // flipt::meta::MetaClient::new(flipt::Config::default())?
-    //     .info()
-    //     .get()
-    //     .await?;
-    //
-    // let flipt_client = flipt::api::ApiClient::new(flipt::Config::default())?;
-    //
-    // for k in tokens.keys() {
-    //     flipt_client
-    //         .flags()
-    //         .get(&flipt::api::flag::FlagGetRequest {
-    //             namespace_key: None,
-    //             key: k.to_string(),
-    //         })
-    //         .await?;
-    // }
-    //
-    Ok(())
-}
+    let found_flags_set: HashMap<_, _> = ffs
+        .scan()?
+        .iter()
+        .cloned()
+        .filter(|f| f.namespace_key == args.namespace.clone().unwrap_or("default".to_string()))
+        .map(|f| (f.flag_key.clone(), f))
+        .collect();
 
-fn write_output(flags: Vec<Flag>, to: Option<String>) -> Result<()> {
-    let mut out_writer: Box<dyn std::io::Write> = match to {
+    let flipt_config = flipt::Config::default();
+
+    // checks if the flipt server is up and running
+    flipt::meta::MetaClient::new(flipt_config.clone())?
+        .info()
+        .get()
+        .await?;
+
+    let flipt_client = flipt::api::ApiClient::new(flipt_config)?;
+
+    // TODO: paginate
+    let existing_flags = flipt_client
+        .flags()
+        .list(&flipt::api::flag::FlagListRequest {
+            namespace_key: args.namespace,
+            ..Default::default()
+        })
+        .await?;
+
+    let existing_flags_set: HashMap<_, _> = existing_flags
+        .flags
+        .iter()
+        .map(|f| (f.key.clone(), f))
+        .collect();
+
+    let mut out_writer: Box<dyn std::io::Write> = match args.output {
         Some(s) => Box::new(std::fs::File::create(s)?),
         None => Box::new(std::io::stdout()),
     };
 
-    for f in flags {
-        let json = serde_json::to_string(&f)?;
+    // get collection of found flags that do not existing in flipt
+    let missing_flags = found_flags_set
+        .iter()
+        .filter(|(k, _)| !existing_flags_set.contains_key(k.as_str()))
+        .map(|(_, v)| v)
+        .collect::<Vec<_>>();
+
+    // ensure all found flags exist in flipt, write to output if not
+    for flag in &missing_flags {
+        let json = serde_json::to_string(&flag)?;
         writeln!(out_writer, "{json}")?;
+    }
+
+    if !missing_flags.is_empty() {
+        bail!("Found {} missing flags", missing_flags.len());
     }
 
     Ok(())

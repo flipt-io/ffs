@@ -318,9 +318,9 @@ dependencies = [
 
 [[package]]
 name = "flipt"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b5855d759751672265bf9e795c23326e3455dace5aa473c87f6f1747ad689bf"
+checksum = "660b015398765418cd1ae0b296e62a5f1de20b2b9903480b657ab72d89f1ced8"
 dependencies = [
  "anyhow",
  "chrono",
