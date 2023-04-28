@@ -1,44 +1,68 @@
-var (
-	store  = &storeMock{}
-	logger = zaptest.NewLogger(t)
-	s      = &Server{
-		logger: logger,
-		store:  store,
-	}
+package main
+
+import (
+	"context"
+	"fmt"
+
+	flipt "go.flipt.io/flipt/rpc/flipt"
+	sdk "go.flipt.io/flipt/sdk/go"
+	sdkgrpc "go.flipt.io/flipt/sdk/go/grpc"
+	grpc "google.golang.org/grpc"
 )
 
-store.On("GetFlag", mock.Anything, mock.Anything, "foo").Return(enabledFlag, nil)
+func main() {
+	conn, err := grpc.Dial("localhost:9090")
+	if err != nil {
+		panic(err)
+	}
 
-store.On("GetEvaluationRules", mock.Anything, mock.Anything, "foo").Return([]*storage.EvaluationRule{}, nil)
+	transport := sdkgrpc.NewTransport(conn)
 
-// this is a comment that mentions the flagKey 'foo' but should not be included in the output
-resp, err := s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId:     "1",
-	NamespaceKey: "default",
-	FlagKey:      "foo",
-	Context: map[string]string{
-		"bar": "boz",
-	},
-})
+	client := sdk.New(transport)
 
-resp, err = s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId:     "1",
-	NamespaceKey: "production",
-	FlagKey:      "bar",
-	Context: map[string]string{
-		"bar": "boz",
-	},
-})
+	// this is a comment that mentions the FlagKey 'foo' but should not be included in the output
+	_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{
+		EntityId:     "1",
+		NamespaceKey: "default",
+		FlagKey:      "foo",
+		Context: map[string]string{
+			"bar": "boz",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
 
-resp, err = s.Evaluate(context.TODO(), &flipt.EvaluationRequest{
-	EntityId:     "1",
-	NamespaceKey: "default",
-	FlagKey:      "boz",
-	Context: map[string]string{
-		"bar": "boz",
-	},
-})
+	_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{
+		EntityId:     "1",
+		NamespaceKey: "production",
+		FlagKey:      "bar",
+		Context: map[string]string{
+			"bar": "boz",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
 
-flag, err := s.GetFlag(context.TODO(), &flipt.GetFlagRequest{
-	Key: "foo",
-})
+	_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{
+		EntityId:     "1",
+		NamespaceKey: "default",
+		FlagKey:      "boz",
+		Context: map[string]string{
+			"bar": "boz",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	flag, err := client.Flipt().GetFlag(context.TODO(), &flipt.GetFlagRequest{
+		Key: "foo",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("flag: %v\n", flag)
+}
