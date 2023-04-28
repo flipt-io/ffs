@@ -22,16 +22,18 @@ impl std::fmt::Display for Flag {
 #[serde(rename_all = "camelCase")]
 pub struct Location {
     pub file: String,
-    pub line: usize,
-    pub column: usize,
+    pub start_line: usize,
+    pub start_column: usize,
+    pub end_line: usize,
+    pub end_column: usize,
 }
 
 impl std::fmt::Display for Location {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "file: {} [line: {}, col: {}]",
-            self.file, self.line, self.column
+            "file: {} start: [line: {}, col: {}] end: [line: {}, col: {}]",
+            self.file, self.start_line, self.start_column, self.end_line, self.end_column
         )
     }
 }
