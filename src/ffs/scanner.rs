@@ -51,6 +51,8 @@ impl Scanner {
 
             let mut query_cursor = QueryCursor::new();
             let fn_arg_index = query.capture_index_for_name("arg").unwrap();
+            let namespace_index = query.capture_index_for_name("namespaceValue").unwrap();
+            let flag_index = query.capture_index_for_name("flagValue").unwrap();
 
             for each_match in query_cursor.matches(&query, parsed.root_node(), code.as_bytes()) {
                 for capture in each_match
@@ -58,10 +60,6 @@ impl Scanner {
                     .iter()
                     .filter(|c| c.index == fn_arg_index)
                 {
-                    // get namespace and flag key from the function call
-                    let namespace_index = query.capture_index_for_name("namespaceValue").unwrap();
-                    let flag_index = query.capture_index_for_name("flagValue").unwrap();
-
                     // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
                     let namespace_key = each_match
                         .captures
@@ -78,7 +76,7 @@ impl Scanner {
 
                     let range = capture.node.range();
 
-                    let flag = Flag {
+                    flags.push(Flag {
                         namespace_key: unescape(namespace_key.unwrap_or("default")).unwrap(),
                         flag_key: unescape(flag_key.unwrap()).unwrap(),
                         location: Location {
@@ -88,9 +86,7 @@ impl Scanner {
                             end_line: range.end_point.row,
                             end_column: range.end_point.column,
                         },
-                    };
-
-                    flags.push(flag.clone());
+                    });
                 }
             }
         }
