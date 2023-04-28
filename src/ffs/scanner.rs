@@ -4,8 +4,8 @@ use crate::types::{
 };
 use anyhow::{Ok, Result};
 use snailquote::unescape;
-use std::fs;
-use tree_sitter::{Query, QueryCursor};
+use std::{collections::HashMap, fs};
+use tree_sitter::{Query, QueryCapture, QueryCursor};
 use walkdir::{DirEntry, WalkDir};
 
 pub struct Scanner {
@@ -49,45 +49,41 @@ impl Scanner {
             let code = fs::read_to_string(path).expect("Unable to read file");
             let parsed = parser.parse(&code, None).expect("Error parsing code");
 
-            let mut query_cursor = QueryCursor::new();
-            let fn_arg_index = query.capture_index_for_name("arg").unwrap();
-            let namespace_index = query.capture_index_for_name("namespaceValue").unwrap();
-            let flag_index = query.capture_index_for_name("flagValue").unwrap();
-
-            for each_match in query_cursor.matches(&query, parsed.root_node(), code.as_bytes()) {
-                for capture in each_match
+            let mut cursor = QueryCursor::new();
+            for m in cursor.matches(&query, parsed.root_node(), code.as_bytes()) {
+                // captures is a hashmap that stores the value of each capture in the query
+                let captures: HashMap<_, _> = m
                     .captures
                     .iter()
-                    .filter(|c| c.index == fn_arg_index)
-                {
-                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
-                    let namespace_key = each_match
-                        .captures
-                        .iter()
-                        .find(|c| c.index == namespace_index)
-                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
+                    .map(|c: &QueryCapture| (query.capture_names()[c.index as usize].clone(), c))
+                    .collect();
 
-                    // TODO: there is probably a more efficient way to do this since we are iterating over the captures again
-                    let flag_key = each_match
-                        .captures
-                        .iter()
-                        .find(|c| c.index == flag_index)
-                        .and_then(|c| c.node.utf8_text(code.as_bytes()).ok());
+                // root node of the query match
+                let root = captures["call"];
 
-                    let range = capture.node.range();
+                let namespace_key = match captures.get("namespace") {
+                    Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
+                    None => "default",
+                };
 
-                    flags.push(Flag {
-                        namespace_key: unescape(namespace_key.unwrap_or("default")).unwrap(),
-                        flag_key: unescape(flag_key.unwrap()).unwrap(),
-                        location: Location {
-                            file: path.to_string(),
-                            start_line: range.start_point.row,
-                            start_column: range.start_point.column,
-                            end_line: range.end_point.row,
-                            end_column: range.end_point.column,
-                        },
-                    });
-                }
+                let flag_key = match captures.get("flag") {
+                    Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
+                    None => "",
+                };
+
+                let range = root.node.range();
+
+                flags.push(Flag {
+                    namespace_key: unescape(namespace_key).unwrap(),
+                    flag_key: unescape(flag_key).unwrap(),
+                    location: Location {
+                        file: path.to_string(),
+                        start_line: range.start_point.row,
+                        start_column: range.start_point.column,
+                        end_line: range.end_point.row,
+                        end_column: range.end_point.column,
+                    },
+                });
             }
         }
 
