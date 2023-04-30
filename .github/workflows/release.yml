@@ -14,6 +14,14 @@ jobs:
         target: [x86_64-unknown-linux-musl]
 
     steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.FLIPT_RELEASE_BOT_APP_ID }}
+          private_key: ${{ secrets.FLIPT_RELEASE_BOT_APP_PEM }}
+          installation_id: ${{ secrets.FLIPT_RELEASE_BOT_INSTALLATION_ID }}
+
       - uses: actions/checkout@v3
 
       - name: Install rust
@@ -43,6 +51,6 @@ jobs:
         if: github.event_name == 'release'
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
