@@ -1,5 +1,6 @@
 name: Release
 on:
+  workflow_dispatch:
   release:
     types: [created]
 
@@ -10,16 +11,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz
+        target: [x86_64-unknown-linux-musl]
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Compile and release
-        uses: rust-build/rust-build.action@v1.4.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
         with:
-          RUSTTARGET: ${{ matrix.target }}
-          EXTRA_FILES: "README.md rules/"
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: ${{ matrix.target }}
+
+      - name: Build target
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target ${{ matrix.target }}
+
+      - name: Package
+        shell: bash
+        run: |
+          cp -R rules target/${{ matrix.target }}/release # copy rules to target, TODO: embed rules in binary
+          cd target/${{ matrix.target }}/release          
+          tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs rules # package rules and binary
+          cd -
+
+      - name: Upload to Release
+        shell: bash
+        if: github.event_name == 'release'
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
