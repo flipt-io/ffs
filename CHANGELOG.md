@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/flipt-io/ffs/compare/v0.0.4...v0.0.5) (2023-04-30)
+
+
+### Miscellaneous Chores
+
+* release 0.0.5 ([76ac3a7](https://github.com/flipt-io/ffs/commit/76ac3a7161b1d98645fd7922c4f4b7408b30786e))
+
 ## [0.0.4](https://github.com/flipt-io/ffs/compare/v0.0.3...v0.0.4) (2023-04-30)
 
 
