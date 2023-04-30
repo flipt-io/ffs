@@ -40,7 +40,9 @@ jobs:
           cd -
 
       - name: Upload to Release
-        shell: bash
         if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
