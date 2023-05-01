@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/flipt-io/ffs/compare/v0.0.5...v0.0.6) (2023-05-01)
+
+
+### Bug Fixes
+
+* off by one error for lines ([98f2ee6](https://github.com/flipt-io/ffs/commit/98f2ee6a53412ce2003351648317359009693927))
+
 ## [0.0.5](https://github.com/flipt-io/ffs/compare/v0.0.4...v0.0.5) (2023-04-30)
 
 
