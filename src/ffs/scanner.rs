@@ -78,10 +78,10 @@ impl Scanner {
                     flag_key: unescape(flag_key).unwrap(),
                     location: Location {
                         file: path.to_string(),
-                        start_line: range.start_point.row,
-                        start_column: range.start_point.column,
-                        end_line: range.end_point.row,
-                        end_column: range.end_point.column,
+                        start_line: range.start_point.row + 1,
+                        start_column: range.start_point.column + 1,
+                        end_line: range.end_point.row + 1,
+                        end_column: range.end_point.column + 1,
                     },
                 });
             }
