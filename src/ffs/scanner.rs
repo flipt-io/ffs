@@ -3,6 +3,7 @@ use crate::types::{
     language::{Language, SupportedLanguage},
 };
 use anyhow::{Ok, Result};
+use rust_embed::RustEmbed;
 use snailquote::unescape;
 use std::{collections::HashMap, fs};
 use tree_sitter::{Query, QueryCapture, QueryCursor};
@@ -12,6 +13,10 @@ pub struct Scanner {
     language: SupportedLanguage,
     dir: Option<String>,
 }
+
+#[derive(RustEmbed)]
+#[folder = "rules/"]
+struct Rules;
 
 impl Scanner {
     pub fn new(language: SupportedLanguage, dir: Option<String>) -> Self {
@@ -27,8 +32,12 @@ impl Scanner {
             None => ".".to_string(),
         };
 
-        let rules = fs::read_to_string(format!("./rules/{}.scm", self.language))
-            .expect("Unable to read file");
+        let f = match Rules::get(&format!("{}.scm", self.language)) {
+            Some(s) => s,
+            None => panic!("Unable to find rules for language {}", self.language),
+        };
+
+        let rules = std::str::from_utf8(f.data.as_ref()).expect("Unable to load rules");
 
         let ll = Language::from(self.language.to_string());
 
@@ -36,7 +45,7 @@ impl Scanner {
         parser
             .set_language(ll.tree_sitter)
             .expect("Error loading grammar");
-        let query = Query::new(ll.tree_sitter, &rules).expect("Error loading query");
+        let query = Query::new(ll.tree_sitter, rules).expect("Error loading query");
 
         for entry in WalkDir::new(dir)
             .into_iter()
