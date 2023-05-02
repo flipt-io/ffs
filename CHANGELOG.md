@@ -5,7 +5,6 @@
 
 ### Miscellaneous Chores
 
-* release 0.0.7 ([d6ab590](https://github.com/flipt-io/ffs/commit/d6ab5903a21c53961817e28570939e46ef02102f))
 * release 0.0.8 ([4887af3](https://github.com/flipt-io/ffs/commit/4887af34116e96ac35e6651e05457782d0af3e26))
 
 ## [0.0.7](https://github.com/flipt-io/ffs/compare/v0.0.7...v0.0.7) (2023-05-02)
