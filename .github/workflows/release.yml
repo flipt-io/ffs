@@ -52,9 +52,8 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cp -R rules target/${{ matrix.target }}/release # copy rules to target, TODO: embed rules in binary
           cd target/${{ matrix.target }}/release          
-          tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs rules # package rules and binary
+          tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs 
           cd -
 
       - name: Upload to Release
