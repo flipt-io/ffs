@@ -32,7 +32,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashfiles('**/cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashfiles('Cargo.lock') }}
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
