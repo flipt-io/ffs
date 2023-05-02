@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/flipt-io/ffs/compare/v0.0.6...v0.0.7) (2023-05-02)
+
+
+### Bug Fixes
+
+* update flipt-rust to support tls ([9844f2f](https://github.com/flipt-io/ffs/commit/9844f2fad00b49e147c01fb59e96c53f3a4c6523))
+
 ## [0.0.6](https://github.com/flipt-io/ffs/compare/v0.0.5...v0.0.6) (2023-05-02)
 
 
