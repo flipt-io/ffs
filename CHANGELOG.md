@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.9](https://github.com/flipt-io/ffs/compare/v0.0.8...v0.0.9) (2023-05-02)
+
+
+### Bug Fixes
+
+* upgrade to use flipt-rust with rustls ([dbc6046](https://github.com/flipt-io/ffs/commit/dbc6046f8c98e6fccb5a7847cb3b66dc3817b8c3))
+
 ## [0.0.8](https://github.com/flipt-io/ffs/compare/v0.0.7...v0.0.8) (2023-05-02)
 
 
