@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/flipt-io/ffs/compare/v0.0.12...v0.0.13) (2023-05-03)
+
+
+### Features
+
+* reformat errors payload ([#28](https://github.com/flipt-io/ffs/issues/28)) ([95e1dda](https://github.com/flipt-io/ffs/commit/95e1dda54c673243017a682ef2d9533863ef8ee5))
+
 ## [0.0.12](https://github.com/flipt-io/ffs/compare/v0.0.11...v0.0.12) (2023-05-03)
 
 
