@@ -70,10 +70,52 @@ It does this by:
 3. For each flag in code that is not found in the API, it will write the output to `STDOUT` and optionally a file of where the missing flag was found in code.
 
 ```json
-{"namespaceKey":"default","flagKey":"foo","location":{"file":"./examples/go/basic.go","startLine":14,"startColumn":64,"endLine":21,"endColumn":1}}
-{"namespaceKey":"production","flagKey":"bar","location":{"file":"./examples/go/basic.go","startLine":23,"startColumn":63,"endLine":30,"endColumn":1}}
-{"namespaceKey":"default","flagKey":"boz","location":{"file":"./examples/go/basic.go","startLine":32,"startColumn":63,"endLine":39,"endColumn":1}}
-{"namespaceKey":"default","flagKey":"foo","location":{"file":"./examples/go/basic.go","startLine":41,"startColumn":60,"endLine":43,"endColumn":1}}
+[
+    {
+        "namespaceKey": "default",
+        "flagKey": "foo",
+        "location": {
+            "file": "./examples/go/basic.go",
+            "startLine": 14,
+            "startColumn": 64,
+            "endLine": 21,
+            "endColumn": 1
+        }
+    },
+    {
+        "namespaceKey": "production",
+        "flagKey": "bar",
+        "location": {
+            "file": "./examples/go/basic.go",
+            "startLine": 23,
+            "startColumn": 63,
+            "endLine": 30,
+            "endColumn": 1
+        }
+    },
+    {
+        "namespaceKey": "default",
+        "flagKey": "boz",
+        "location": {
+            "file": "./examples/go/basic.go",
+            "startLine": 32,
+            "startColumn": 63,
+            "endLine": 39,
+            "endColumn": 1
+        }
+    },
+    {
+        "namespaceKey": "default",
+        "flagKey": "foo",
+        "location": {
+            "file": "./examples/go/basic.go",
+            "startLine": 41,
+            "startColumn": 60,
+            "endLine": 43,
+            "endColumn": 1
+        }
+    }
+]
 ```
 
 4. An exit code of `1` is returned if any flags are found in code that are not found in the API, otherwise `0` is returned.
