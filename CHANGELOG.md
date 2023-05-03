@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.10](https://github.com/flipt-io/ffs/compare/v0.0.9...v0.0.10) (2023-05-03)
+
+
+### Bug Fixes
+
+* **rules/go:** ensure exact match on field flag key ([2c831df](https://github.com/flipt-io/ffs/commit/2c831df35d4004d1969bf181da6fce659cc3fe80))
+
 ## [0.0.9](https://github.com/flipt-io/ffs/compare/v0.0.8...v0.0.9) (2023-05-02)
 
 
