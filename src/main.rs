@@ -1,13 +1,19 @@
-use std::{collections::HashMap, process::ExitCode};
+use std::process::ExitCode;
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use clap::Parser;
 use human_panic::setup_panic;
 
 use crate::{
     ffs::scanner::Scanner,
-    types::{args::Args, flag::Flag},
+    types::{
+        flag::Flag,
+        args::Args,
+    },
 };
+
+use futures::future::join_all;
+
 mod ffs;
 mod types;
 
@@ -21,17 +27,6 @@ async fn main() -> Result<ExitCode> {
 
     let found_flags = ffs.scan()?;
 
-    let found_flags_set: HashMap<String, Vec<Flag>> = found_flags
-        .iter()
-        .cloned()
-        .filter(|f| f.namespace_key == args.namespace.clone().unwrap_or("default".to_string()))
-        .fold(HashMap::new(), |mut acc, f| {
-            acc.entry(f.flag_key.clone())
-                .or_insert_with(Vec::new)
-                .push(f);
-            acc
-        });
-
     let flipt_config = flipt::Config::new_from_env().unwrap_or_default();
 
     // checks if the flipt server is up and running
@@ -40,40 +35,43 @@ async fn main() -> Result<ExitCode> {
         .get()
         .await?;
 
-    let flipt_client = flipt::api::ApiClient::new(flipt_config)?;
+    let flipt_client = &flipt::api::ApiClient::new(flipt_config)?;
 
-    // TODO: paginate
-    let existing_flags = flipt_client
-        .flags()
-        .list(&flipt::api::flag::FlagListRequest {
-            namespace_key: args.namespace,
-            ..Default::default()
-        })
-        .await?;
+    let flag_results : Vec<Flag> = join_all(found_flags
+        .into_iter()
+        .map(|f| async move {
+            let resp = flipt_client.flags().get(&flipt::api::flag::FlagGetRequest{
+                namespace_key: Some(f.namespace_key.clone()),
+                key: f.flag_key.clone(),
+            }).await;
 
-    let existing_flags_set: HashMap<_, _> = existing_flags
-        .flags
-        .iter()
-        .map(|f| (f.key.clone(), f))
-        .collect();
+            match resp {
+                Ok(_) => None,
+                Err(error) => {
+                    match error.downcast_ref::<flipt::error::Error>() {
+                        Some(flipt::error::Error::Upstream(e)) => {
+                            if e.code == 5 {
+                                Some(f)
+                            } else {
+                                None
+                            }
+                        },
+                        _ => None,
+                    }
+                },
+            }
+        })).await.into_iter().flatten().collect();
 
     let mut out_writer: Box<dyn std::io::Write> = match args.output {
         Some(s) => Box::new(std::fs::File::create(s)?),
         None => Box::new(std::io::stdout()),
     };
 
-    // get collection of found flags and their locations in code that do not existing in flipt
-    let missing_flags: Vec<_> = found_flags_set
-        .iter()
-        .filter(|(k, _)| !existing_flags_set.contains_key(k.as_str()))
-        .flat_map(|(_, v)| v)
-        .collect();
 
-    if !missing_flags.is_empty() {
-        // ensure all found flags exist in flipt, write to output if not
-        let json = serde_json::to_string(&missing_flags)?;
+    // ensure all found flags exist in flipt, write to output if not
+    if !flag_results.is_empty() {
+        let json = serde_json::to_string(&flag_results)?;
         writeln!(out_writer, "{json}")?;
-        return Ok(ExitCode::FAILURE);
     }
 
     Ok(ExitCode::SUCCESS)
