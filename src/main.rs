@@ -69,13 +69,10 @@ async fn main() -> Result<ExitCode> {
         .flat_map(|(_, v)| v)
         .collect();
 
-    // ensure all found flags exist in flipt, write to output if not
-    for flag in &missing_flags {
-        let json = serde_json::to_string(&flag)?;
-        writeln!(out_writer, "{json}")?;
-    }
-
     if !missing_flags.is_empty() {
+        // ensure all found flags exist in flipt, write to output if not
+        let json = serde_json::to_string(&missing_flags)?;
+        writeln!(out_writer, "{json}")?;
         return Ok(ExitCode::FAILURE);
     }
 
