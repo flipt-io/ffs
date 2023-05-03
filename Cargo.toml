@@ -13,6 +13,7 @@ repository = "https://github.com/flipt-io/ffs"
 anyhow = "1.0.70"
 clap = { version = "4.2.0", features = ["derive"] }
 flipt = "0.4.4"
+futures = "0.3.28"
 human-panic = "1.1.3"
 rust-embed = "6.6.1"
 serde = "1.0.159"
