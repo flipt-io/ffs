@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.12](https://github.com/flipt-io/ffs/compare/v0.0.11...v0.0.12) (2023-05-03)
+
+
+### Features
+
+* fetch each scanned flag by namespace and key ([82401ed](https://github.com/flipt-io/ffs/commit/82401ed80893f42a092c6af2f3d7a2cbf58c7b5c))
+
 ## [0.0.11](https://github.com/flipt-io/ffs/compare/v0.0.10...v0.0.11) (2023-05-03)
 
 
