@@ -1,6 +1,7 @@
 use crate::types::{
-    flag::{Flag, Location},
+    flag::Flag,
     language::{Language, SupportedLanguage},
+    location::Location,
 };
 use anyhow::{Ok, Result};
 use rust_embed::RustEmbed;
