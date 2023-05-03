@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.11](https://github.com/flipt-io/ffs/compare/v0.0.10...v0.0.11) (2023-05-03)
+
+
+### Features
+
+* update JSON output ([#22](https://github.com/flipt-io/ffs/issues/22)) ([106e669](https://github.com/flipt-io/ffs/commit/106e6695074f7bcbba0cf21625682cbff5d515c4))
+
 ## [0.0.10](https://github.com/flipt-io/ffs/compare/v0.0.9...v0.0.10) (2023-05-03)
 
 
