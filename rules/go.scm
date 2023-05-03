@@ -9,7 +9,7 @@
             (interpreted_string_literal) @namespace
           )?
           (keyed_element
-            (field_identifier) @_flagKey (#match? @_flagKey "(Key|FlagKey)")
+            (field_identifier) @_flagKey (#match? @_flagKey "^(Key|FlagKey)$")
             (interpreted_string_literal) @flag
           )
         ) 
