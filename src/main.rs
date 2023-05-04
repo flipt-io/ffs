@@ -11,13 +11,15 @@ use futures::future::join_all;
 #[derive(Parser, Clone, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
+    #[arg(long, default_value = "1", help = "Override exit code on issues found")]
+    pub issue_exit_code: u8,
     #[arg(short, long, value_enum)]
     pub language: types::language::SupportedLanguage,
-    #[arg(short, long, help = "Path to output file (default: STDOUT)")]
+    #[arg(short, long, help = "Path to output file [default: STDOUT]")]
     pub output: Option<String>,
-    #[arg(short, long, help = "Path to directory to scan (default: .)")]
+    #[arg(short, long, help = "Path to directory to scan [default: .]")]
     pub dir: Option<String>,
-    #[arg(short, long, help = "Namespace to scan (default: 'default')")]
+    #[arg(short, long, help = "Namespace to scan [default: 'default']")]
     pub namespace: Option<String>,
 }
 
@@ -93,6 +95,7 @@ async fn main() -> Result<ExitCode> {
         };
         let json = serde_json::to_string(&results)?;
         writeln!(out_writer, "{json}")?;
+        return Ok(ExitCode::from(args.issue_exit_code));
     }
 
     Ok(ExitCode::SUCCESS)
