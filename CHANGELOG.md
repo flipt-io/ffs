@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.14](https://github.com/flipt-io/ffs/compare/v0.0.13...v0.0.14) (2023-05-04)
+
+
+### Features
+
+* allow overriding of exit code in case missing flags were found ([#31](https://github.com/flipt-io/ffs/issues/31)) ([c19f76e](https://github.com/flipt-io/ffs/commit/c19f76e4929ed2ced15ad49c1e30a50b419e36a3))
+
 ## [0.0.13](https://github.com/flipt-io/ffs/compare/v0.0.12...v0.0.13) (2023-05-03)
 
 
