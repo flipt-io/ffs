@@ -1,12 +1,12 @@
-use std::process::ExitCode;
 use std::fmt;
+use std::process::ExitCode;
 
 use anyhow::Result;
 use clap::Parser;
+use colored::*;
 use ffs::{ffs::scanner::Scanner, types};
 use human_panic::setup_panic;
 use serde::Serialize;
-use colored::*;
 
 use futures::future::join_all;
 
@@ -32,7 +32,7 @@ const NOT_FOUND_ERROR_CODE: i32 = 5;
 #[derive(Clone, Debug, clap::ValueEnum)]
 pub enum Format {
     Json,
-    Text
+    Text,
 }
 
 #[tokio::main]
@@ -154,9 +154,7 @@ struct JSONWriter {
 
 impl JSONWriter {
     fn new(results: Results) -> Self {
-        JSONWriter {
-            results,
-        }
+        JSONWriter { results }
     }
 }
 
@@ -173,9 +171,7 @@ struct TextWriter {
 
 impl TextWriter {
     fn new(results: Results) -> Self {
-        TextWriter {
-            results,
-        }
+        TextWriter { results }
     }
 }
 
