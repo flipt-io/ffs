@@ -1,7 +1,9 @@
+use std::fmt;
 use std::process::ExitCode;
 
 use anyhow::Result;
 use clap::Parser;
+use colored::*;
 use ffs::{ffs::scanner::Scanner, types};
 use human_panic::setup_panic;
 use serde::Serialize;
@@ -17,6 +19,8 @@ pub struct Args {
     pub language: types::language::SupportedLanguage,
     #[arg(short, long, help = "Path to output file [default: STDOUT]")]
     pub output: Option<String>,
+    #[arg(short, long, value_enum, default_value = "text")]
+    pub format: Option<Format>,
     #[arg(short, long, help = "Path to directory to scan [default: .]")]
     pub dir: Option<String>,
     #[arg(short, long, help = "Namespace to scan [default: 'default']")]
@@ -24,6 +28,12 @@ pub struct Args {
 }
 
 const NOT_FOUND_ERROR_CODE: i32 = 5;
+
+#[derive(Clone, Debug, clap::ValueEnum)]
+pub enum Format {
+    Json,
+    Text,
+}
 
 #[tokio::main]
 async fn main() -> Result<ExitCode> {
@@ -51,7 +61,7 @@ async fn main() -> Result<ExitCode> {
                 .flags()
                 .get(&flipt::api::flag::FlagGetRequest {
                     namespace_key: Some(f.namespace_key.clone()),
-                    key: f.flag_key.clone(),
+                    key: f.key.clone(),
                 })
                 .await;
 
@@ -87,14 +97,26 @@ async fn main() -> Result<ExitCode> {
                 .map(|f| Error {
                     message: format!(
                         "Flag: [key: {}, namespace: {}] not found in your Flipt instance",
-                        f.flag_key, f.namespace_key
+                        f.key, f.namespace_key
                     ),
-                    location: f.location,
+                    flag: f,
                 })
                 .collect(),
         };
-        let json = serde_json::to_string(&results)?;
-        writeln!(out_writer, "{json}")?;
+
+        match args.format {
+            Some(Format::Json) => {
+                let writer = JSONWriter::new(results);
+                write!(out_writer, "{}", writer)?;
+            }
+            Some(Format::Text) | None => {
+                write!(out_writer, "{}", "Error: ".bright_red())?;
+                writeln!(out_writer, "Found {} issues\n", results.errors.len())?;
+                let writer = TextWriter::new(results);
+                write!(out_writer, "{}", writer)?;
+            }
+        }
+
         return Ok(ExitCode::from(args.issue_exit_code));
     }
 
@@ -111,5 +133,47 @@ struct Results {
 #[serde(rename_all = "camelCase")]
 struct Error {
     message: String,
-    location: crate::types::location::Location,
+    flag: crate::types::flag::Flag,
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "- Message: {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.flag.location.file, self.flag.location.start_line, self.flag.location.end_line, self.flag.location.start_column, self.flag.location.end_column)
+    }
+}
+
+struct JSONWriter {
+    results: Results,
+}
+
+impl JSONWriter {
+    fn new(results: Results) -> Self {
+        JSONWriter { results }
+    }
+}
+
+impl fmt::Display for JSONWriter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let json = serde_json::to_string_pretty(&self.results).unwrap();
+        writeln!(f, "{}", json)
+    }
+}
+
+struct TextWriter {
+    results: Results,
+}
+
+impl TextWriter {
+    fn new(results: Results) -> Self {
+        TextWriter { results }
+    }
+}
+
+impl fmt::Display for TextWriter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for error in &self.results.errors {
+            writeln!(f, "{}\n", error)?;
+        }
+        Ok(())
+    }
 }
