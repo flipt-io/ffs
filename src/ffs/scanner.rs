@@ -85,7 +85,7 @@ impl Scanner {
 
                 flags.push(Flag {
                     namespace_key: unescape(namespace_key).unwrap(),
-                    flag_key: unescape(flag_key).unwrap(),
+                    key: unescape(flag_key).unwrap(),
                     location: Location {
                         file: path.to_string(),
                         start_line: range.start_point.row + 1,

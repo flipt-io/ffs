@@ -61,7 +61,7 @@ async fn main() -> Result<ExitCode> {
                 .flags()
                 .get(&flipt::api::flag::FlagGetRequest {
                     namespace_key: Some(f.namespace_key.clone()),
-                    key: f.flag_key.clone(),
+                    key: f.key.clone(),
                 })
                 .await;
 
@@ -97,9 +97,9 @@ async fn main() -> Result<ExitCode> {
                 .map(|f| Error {
                     message: format!(
                         "Flag: [key: {}, namespace: {}] not found in your Flipt instance",
-                        f.flag_key, f.namespace_key
+                        f.key, f.namespace_key
                     ),
-                    location: f.location,
+                    flag: f,
                 })
                 .collect(),
         };
@@ -139,12 +139,12 @@ struct Results {
 #[serde(rename_all = "camelCase")]
 struct Error {
     message: String,
-    location: crate::types::location::Location,
+    flag: crate::types::flag::Flag,
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "- Message: {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.location.file, self.location.start_line, self.location.end_line, self.location.start_column, self.location.end_column)
+        write!(f, "- Message: {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.flag.location.file, self.flag.location.start_line, self.flag.location.end_line, self.flag.location.start_column, self.flag.location.end_column)
     }
 }
 
