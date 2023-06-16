@@ -109,13 +109,7 @@ async fn main() -> Result<ExitCode> {
                 let writer = JSONWriter::new(results);
                 write!(out_writer, "{}", writer)?;
             }
-            Some(Format::Text) => {
-                write!(out_writer, "{}", "Error: ".bright_red())?;
-                writeln!(out_writer, "Found {} issues\n", results.errors.len())?;
-                let writer = TextWriter::new(results);
-                write!(out_writer, "{}", writer)?;
-            }
-            None => {
+            Some(Format::Text) | None => {
                 write!(out_writer, "{}", "Error: ".bright_red())?;
                 writeln!(out_writer, "Found {} issues\n", results.errors.len())?;
                 let writer = TextWriter::new(results);
