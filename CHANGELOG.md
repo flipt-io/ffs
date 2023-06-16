@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.15](https://github.com/flipt-io/ffs/compare/v0.0.14...v0.0.15) (2023-06-16)
+
+
+### Features
+
+* add human readable output; ability to select format ([#33](https://github.com/flipt-io/ffs/issues/33)) ([a91f488](https://github.com/flipt-io/ffs/commit/a91f488539b08cf263bda26ad5e8b98d62ce16c7))
+
 ## [0.0.14](https://github.com/flipt-io/ffs/compare/v0.0.13...v0.0.14) (2023-05-04)
 
 
