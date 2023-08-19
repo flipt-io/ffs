@@ -7,7 +7,6 @@ use ffs::{ffs::scanner::Scanner, types};
 use human_panic::setup_panic;
 use serde::Serialize;
 
-
 #[derive(Parser, Clone, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
@@ -22,7 +21,6 @@ pub struct Args {
     #[arg(short, long, help = "Namespace to filter [default: '']")]
     pub namespace: Option<String>,
 }
-
 
 #[derive(Clone, Debug, clap::ValueEnum)]
 pub enum Format {
@@ -47,22 +45,22 @@ async fn main() -> Result<ExitCode> {
 
     if !found_flags.is_empty() {
         let results = found_flags
-                .into_iter()
-                .filter(|f| {
-                    if let Some(ns) = &args.namespace {
-                        f.namespace_key == *ns
-                    } else {
-                        true
-                    }
-                })
-                .map(|f| Res {
-                    message: format!(
-                        "Found flag: [key: {}, namespace: {}]",
-                        f.key, f.namespace_key
-                    ),
-                    flag: f,
-                })
-                .collect();
+            .into_iter()
+            .filter(|f| {
+                if let Some(ns) = &args.namespace {
+                    f.namespace_key == *ns
+                } else {
+                    true
+                }
+            })
+            .map(|f| Res {
+                message: format!(
+                    "Found flag: [key: {}, namespace: {}]",
+                    f.key, f.namespace_key
+                ),
+                flag: f,
+            })
+            .collect();
 
         match args.format {
             Some(Format::Json) => {
