@@ -12,11 +12,13 @@ A CLI tool to find Flipt feature flags in code
 Usage: ffs [OPTIONS] --language <LANGUAGE>
 
 Options:
-  -l, --language <LANGUAGE>  [possible values: go]
-  -o, --output <OUTPUT>      Path to output file (default STDOUT)
-  -d, --dir <DIR>            Path to directory to scan (default .)
-  -h, --help                 Print help
-  -V, --version              Print version
+  -l, --language <LANGUAGE>    [possible values: go]
+  -o, --output <OUTPUT>        Path to output file [default: STDOUT]
+  -f, --format <FORMAT>        [default: text] [possible values: json, text]
+  -d, --dir <DIR>              Path to directory to scan [default: .]
+  -n, --namespace <NAMESPACE>  Namespace to filter [default: '']
+  -h, --help                   Print help
+  -V, --version                Print version
 ```
 
 ## Building/Running Locally
@@ -40,7 +42,7 @@ With args:
 Currently, the CLI tool is split into two parts:
 
 - Parsing
-- Validation
+- Reporting
 
 ### Parsing
 
@@ -59,64 +61,29 @@ The query rules are written as an S-Expression: [go.scm](./rules/go.scm)
 3. It checks the values of the captured values, which should contain the matching `Key` or `FlagKey`, and `NamespaceKey` values.
 4. Finally, it captures the filename and location of the code.
 
-### Validation
+### Reporting
 
-The tool takes output of the parser step and validates the results against the Flipt API.
+The tool takes output of the parser step and reports the results to the CLI
 
-It does this by:
-
-1. Fetching the list of all flags from the Flipt API for the given namespace. It defaults to trying to access Flipt at `http://localhost:8080` but can be configured with the `FLIPT_ENDPOINT` environment variable.
-2. It then checks the results of the parser against the list of flags returned from the API.
-3. For each flag in code that is not found in the API, it will write the output to `STDOUT` and optionally a file of where the missing flag was found in code.
 
 ```json
-{
-  "errors": [
-    {
-      "message": "Flag: [key: foo, namespace: default] not found in your Flipt instance",
+[
+  {
+    "message": "Found flag: [key: bar, namespace: production]",
+    "flag": {
+      "namespaceKey": "production",
+      "key": "bar",
       "location": {
-        "file": "../ffs-demo-go/main.go",
-        "startLine": 24,
-        "startColumn": 11,
-        "endLine": 31,
-        "endColumn": 4
-      }
-    },
-    {
-      "message": "Flag: [key: bar, namespace: production] not found in your Flipt instance",
-      "location": {
-        "file": "../ffs-demo-go/main.go",
+        "file": "./examples/go/basic.go",
         "startLine": 36,
         "startColumn": 11,
         "endLine": 43,
         "endColumn": 4
       }
-    },
-    {
-      "message": "Flag: [key: boz, namespace: default] not found in your Flipt instance",
-      "location": {
-        "file": "../ffs-demo-go/main.go",
-        "startLine": 48,
-        "startColumn": 11,
-        "endLine": 55,
-        "endColumn": 4
-      }
-    },
-    {
-      "message": "Flag: [key: bar, namespace: default] not found in your Flipt instance",
-      "location": {
-        "file": "../ffs-demo-go/main.go",
-        "startLine": 60,
-        "startColumn": 15,
-        "endLine": 62,
-        "endColumn": 4
-      }
     }
-  ]
-}
+  }
+]
 ```
-
-4. An exit code of `1` is returned if any flags are found in code that are not found in the API, otherwise `0` is returned.
 
 ## Releasing
 
