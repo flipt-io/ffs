@@ -71,12 +71,13 @@ impl Scanner {
                 // root node of the query match
                 let root = captures["call"];
 
-                let namespace_key = match captures.get("namespace") {
+
+                let namespace_key = match captures.get("namespace_value") {
                     Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
                     None => "default",
                 };
 
-                let flag_key = match captures.get("flag") {
+                let flag_key = match captures.get("flag_value") {
                     Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
                     None => "",
                 };
