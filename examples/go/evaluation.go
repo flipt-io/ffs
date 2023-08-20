@@ -63,24 +63,6 @@ func main() {
 		RequestId: "123",
 		Requests:  reqs,
 	})
-	// defining a slice of requests outside of the function call
-	[]*evaluation.EvaluationRequest{
-		{
-			EntityId:     "1",
-			NamespaceKey: "production",
-			FlagKey:      "bar",
-			Context: map[string]string{
-				"bar": "boz",
-			},
-		},
-		{
-			EntityId: "1",
-			FlagKey:  "bar",
-			Context: map[string]string{
-				"bar": "boz",
-			},
-		},
-	}
 
 	// defining a slice of requests inside of the function call
 	_, err = client.Evaluation().Batch(context.TODO(), &evaluation.BatchEvaluationRequest{
