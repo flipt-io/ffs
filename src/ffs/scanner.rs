@@ -26,7 +26,8 @@ impl Scanner {
 
     /// Scan the directory for files for the given language and find all flag keys along with their locations.
     pub fn scan(&mut self) -> Result<Vec<Flag>> {
-        let mut flags = Vec::new();
+        // keep track of all flags found, using the file path, start line, and end line as the key for deduplication
+        let mut flags = HashMap::new();
 
         let dir = match self.dir.to_owned() {
             Some(s) => s,
@@ -83,21 +84,27 @@ impl Scanner {
 
                 let range = root.node.range();
 
-                flags.push(Flag {
-                    namespace_key: unescape(namespace_key).unwrap(),
-                    key: unescape(flag_key).unwrap(),
-                    location: Location {
-                        file: path.to_string(),
-                        start_line: range.start_point.row + 1,
-                        start_column: range.start_point.column + 1,
-                        end_line: range.end_point.row + 1,
-                        end_column: range.end_point.column + 1,
-                    },
-                });
+                let file = path;
+                let start_line = range.start_point.row + 1;
+                let end_line = range.end_point.row + 1;
+
+                flags
+                    .entry(format!("{file}/{start_line}/{end_line}"))
+                    .or_insert(Flag {
+                        namespace_key: unescape(namespace_key).unwrap(),
+                        key: unescape(flag_key).unwrap(),
+                        location: Location {
+                            file: file.to_string(),
+                            start_line,
+                            start_column: range.start_point.column + 1,
+                            end_line,
+                            end_column: range.end_point.column + 1,
+                        },
+                    });
             }
         }
 
-        Ok(flags)
+        Ok(flags.values().cloned().collect())
     }
 }
 

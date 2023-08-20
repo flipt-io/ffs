@@ -19,6 +19,7 @@
   )
 ) @call
 
+;; This is the same as above, but with the namespace key omitted for matching optional namespace
 (call_expression
   function: (selector_expression
     field: (field_identifier) @method (#match? @method "(GetFlag|Evaluate|Boolean|Variant)"))
@@ -36,5 +37,3 @@
     )
   )
 ) @call
-
-
