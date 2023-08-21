@@ -46,9 +46,8 @@ func main() {
 	}
 
 	_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{
-		EntityId:     "1",
-		NamespaceKey: "default",
-		FlagKey:      "boz",
+		EntityId: "1",
+		FlagKey:  "boz",
 		Context: map[string]string{
 			"bar": "boz",
 		},
