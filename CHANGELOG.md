@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.16](https://github.com/flipt-io/ffs/compare/v0.0.15...v0.0.16) (2023-09-04)
+
+
+### Features
+
+* Build macos ([#39](https://github.com/flipt-io/ffs/issues/39)) ([8d06d08](https://github.com/flipt-io/ffs/commit/8d06d08671dea01f1a3d5e1c61814597f826ca1b))
+
 ## [0.0.15](https://github.com/flipt-io/ffs/compare/v0.0.14...v0.0.15) (2023-08-21)
 
 
