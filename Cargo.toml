@@ -6,6 +6,7 @@ edition = "2021"
 authors = ["Flipt Dev <dev@flipt.io>"]
 homepage = "https://github.com/flipt-io/ffs"
 repository = "https://github.com/flipt-io/ffs"
+license = "Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
