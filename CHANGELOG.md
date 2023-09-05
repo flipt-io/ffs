@@ -5,7 +5,7 @@
 
 ### Features
 
-* **wip:** notarize macos build ([#41](https://github.com/flipt-io/ffs/issues/41)) ([adc4a4e](https://github.com/flipt-io/ffs/commit/adc4a4eb5ce7cb941d91d3161321b2e997408185))
+* notarize macos build ([#41](https://github.com/flipt-io/ffs/issues/41)) ([adc4a4e](https://github.com/flipt-io/ffs/commit/adc4a4eb5ce7cb941d91d3161321b2e997408185))
 
 ## [0.0.16](https://github.com/flipt-io/ffs/compare/v0.0.15...v0.0.16) (2023-09-04)
 
