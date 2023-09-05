@@ -1,5 +1,9 @@
 # Flipt Flag Search
 
+![Release](https://img.shields.io/github/release/flipt-io/ffs.svg?style=flat)
+
+Find [Flipt](https://github.com/flipt-io/flipt) feature flags calls in your codebase
+
 ## Requirements
 
 - Rust - [install](https://rustup.rs/)
@@ -35,7 +39,27 @@ With args:
 
 ## Limitations
 
-- Currently only supports parsing Go code.
+Currently only supports parsing Go code.
+
+Other language support is planned, but not yet implemented:
+
+- [ ] Python [#43](https://github.com/flipt-io/ffs/issues/43)
+- [ ] Java [#44](https://github.com/flipt-io/ffs/issues/44)
+- [ ] Javascript/Typescript [#42](https://github.com/flipt-io/ffs/issues/42)
+- [ ] Rust [#45](https://github.com/flipt-io/ffs/issues/45)
+
+## Contributing
+
+### Conventional Commits
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages. This allows us to automate the release process and generate a changelog.
+
+### Adding a new language
+
+1. Add a new language to the `SupportedLanguage` enum in [src/types/language.rs](./src/types/language.rs)
+1. Add a new set of rules for the language in [rules](./rules). The rules are written in [S-Expression](https://en.wikipedia.org/wiki/S-expression) format and the syntax is documented in the [TreeSitter Query docs](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries). Note: the filename must match the language name in the enum.
+1. Add a new `match` arm in [src/parser.rs](./src/parser.rs) to handle the new language.
+1. Add a new set of examples in [examples](./examples) for the new language.
 
 ## How it Works
 
@@ -46,25 +70,23 @@ Currently, the CLI tool is split into two parts:
 
 ### Parsing
 
-The parsing step look for instances of the following method calls:
+The parsing step look for instances of Flipt evaluation and flag retrieval methods:
 
 - `GetFlag`
-- `Evaluate`
+- `Evaluate` (v1)
+- `Boolean` (v2)
+- `Variant` (v2)
 
 It accomplishes this by:
 
-1. Using the [Rust tree-sitter bindings](https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_rust) and [Go tree-sitter grammar](https://github.com/tree-sitter/tree-sitter-go) to build a syntax tree of a set of Go files.
-2. We then use a TreeSitter query to look for the nodes that we care about, that match the signature of our known `Evaluate/GetFlag` methods and extract the value of the `FlagKey` and optionally `NamespaceKey` fields.
+1. Using the [Rust tree-sitter bindings](https://github.com/tree-sitter/tree-sitter/tree/master/lib/binding_rust) and Language specific tree-sitter grammar [ex: Go](https://github.com/tree-sitter/tree-sitter-go) to build a syntax tree.
+2. Then use a TreeSitter query to look for the nodes that we care about, that match the signature of our known `Evaluate/GetFlag/Boolean/Variant` methods and extract the value of the `FlagKey` and optionally `NamespaceKey` fields.
 
-The query rules are written as an S-Expression: [go.scm](./rules/go.scm)
-
-3. It checks the values of the captured values, which should contain the matching `Key` or `FlagKey`, and `NamespaceKey` values.
-4. Finally, it captures the filename and location of the code.
+The query rules are written as an S-Expression: ie: [go.scm](./rules/go.scm)
 
 ### Reporting
 
 The tool takes output of the parser step and reports the results to the CLI
-
 
 ```json
 [
@@ -83,23 +105,4 @@ The tool takes output of the parser step and reports the results to the CLI
     }
   }
 ]
-```
-
-## Releasing
-
-### Cross Compiling
-
-#### MacOS
-
-1. For building the binary for Linux on MacOS, you'll need to install the `musl-cross` toolchain:
-
-```console
-brew install FiloSottile/musl-cross/musl-cross
-rustup target add x86_64-unknown-linux-musl
-```
-
-2. Then you can build the binary for Linux:
-
-```console
-TARGET_CC=x86_64-linux-musl-gcc cargo build --release --target x86_64-unknown-linux-musl
 ```
