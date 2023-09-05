@@ -4,9 +4,18 @@
 
 Find [Flipt](https://github.com/flipt-io/flipt) feature flags in your codebase
 
-## Requirements
+## Install
 
-- Rust - [install](https://rustup.rs/)
+### Homebrew
+
+```console
+brew tap flipt-io/brew
+brew install ffs
+```
+
+### Cargo
+
+TODO
 
 ## Usage
 
@@ -26,6 +35,10 @@ Options:
 ```
 
 ## Building/Running Locally
+
+### Requirements
+
+- Rust - [install](https://rustup.rs/)
 
 ### Running Debug
 
