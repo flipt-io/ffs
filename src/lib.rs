@@ -1,2 +1,2 @@
-pub mod ffs;
+pub mod scanner;
 pub mod types;

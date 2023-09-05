@@ -1,11 +1,11 @@
-use std::fmt;
-use std::process::ExitCode;
-
 use anyhow::Result;
 use clap::Parser;
-use ffs::{ffs::scanner::Scanner, types};
+use ffs::scanner::Scanner;
+use ffs::types;
 use human_panic::setup_panic;
 use serde::Serialize;
+use std::fmt;
+use std::process::ExitCode;
 
 #[derive(Parser, Clone, Debug)]
 #[command(author, version, about, long_about = None)]
