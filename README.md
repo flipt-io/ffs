@@ -2,7 +2,7 @@
 
 ![Release](https://img.shields.io/github/release/flipt-io/ffs.svg?style=flat)
 
-Find [Flipt](https://github.com/flipt-io/flipt) feature flags calls in your codebase
+Find [Flipt](https://github.com/flipt-io/flipt) feature flags in your codebase
 
 ## Requirements
 
@@ -57,8 +57,8 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/en/
 ### Adding a new language
 
 1. Add a new language to the `SupportedLanguage` enum in [src/types/language.rs](./src/types/language.rs)
+1. Add new `match` arms in [src/types/language.rs](./src/types/language.rs) to handle the new language (`From` and `Display` traits).
 1. Add a new set of rules for the language in [rules](./rules). The rules are written in [S-Expression](https://en.wikipedia.org/wiki/S-expression) format and the syntax is documented in the [TreeSitter Query docs](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries). Note: the filename must match the language name in the enum.
-1. Add a new `match` arm in [src/parser.rs](./src/parser.rs) to handle the new language.
 1. Add a new set of examples in [examples](./examples) for the new language.
 
 ## How it Works
@@ -73,9 +73,9 @@ Currently, the CLI tool is split into two parts:
 The parsing step look for instances of Flipt evaluation and flag retrieval methods:
 
 - `GetFlag`
-- `Evaluate` (v1)
-- `Boolean` (v2)
-- `Variant` (v2)
+- `Evaluate` (v1 evaluation)
+- `Boolean` (v2 evaluation)
+- `Variant` (v2 evaluation)
 
 It accomplishes this by:
 
