@@ -79,7 +79,7 @@ impl Scanner {
 
                 let flag_key = match captures.get("flag_value") {
                     Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
-                    None => "",
+                    None => "unknown",
                 };
 
                 let range = root.node.range();

@@ -16,7 +16,7 @@
         )
       )
     )
-  )
+  )?
 ) @call
 
 ;; This is the same as above, but with the namespace key omitted for matching optional namespace
@@ -35,5 +35,5 @@
         )
       )
     )
-  )
+  )?
 ) @call

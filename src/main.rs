@@ -28,8 +28,7 @@ pub enum Format {
     Text,
 }
 
-#[tokio::main]
-async fn main() -> Result<ExitCode> {
+fn main() -> Result<ExitCode> {
     setup_panic!();
 
     let args = Args::parse();
