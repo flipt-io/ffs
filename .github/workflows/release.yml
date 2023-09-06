@@ -71,7 +71,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
+          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
   release-darwin:
     name: release ${{ matrix.target }}
@@ -153,4 +153,4 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
+          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz ffs-${{ matrix.target }}.tar.gz.sha256.txt
