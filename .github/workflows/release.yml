@@ -52,9 +52,17 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cd target/${{ matrix.target }}/release          
+          pushd target/${{ matrix.target }}/release
           tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs 
-          cd -
+          popd
+          shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
+
+      - name: Upload Artifacts
+        with:
+          name: Linux Artifacts
+          path: |
+            ffs-${{ matrix.target }}.tar.gz
+            ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload to Release
         if: github.event_name == 'release'
@@ -125,9 +133,17 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cd target/${{ matrix.target }}/release          
+          pushd target/${{ matrix.target }}/release
           tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs 
-          cd -
+          popd
+          shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
+
+      - name: Upload Artifacts
+        with:
+          name: Mac Artifacts
+          path: |
+            ffs-${{ matrix.target }}.tar.gz
+            ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload to Release
         if: github.event_name == 'release'
