@@ -8,5 +8,5 @@ fn test_scan_go() {
         .unwrap();
 
     assert_eq!(results.len(), 6);
-    assert!(results.iter().any(|f| f.key == "foo"));
+    assert!(results.iter().any(|f| f.key.as_ref().unwrap() == "foo"));
 }

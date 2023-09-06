@@ -13,8 +13,7 @@ func main() {
 
 	client := sdk.New(transport)
 
-	// this is a comment that mentions the FlagKey 'foo' but should not be included in the output
-	_, err := client.Evaluation().Boolean(context.TODO(), &evaluation.EvaluationRequest{
+	req := &evaluation.EvaluationRequest{
 		RequestId:    "123",
 		EntityId:     "1",
 		NamespaceKey: "default",
@@ -22,7 +21,9 @@ func main() {
 		Context: map[string]string{
 			"bar": "boz",
 		},
-	})
+	}
+	// this is a comment that mentions the FlagKey 'foo' but should not be included in the output
+	_, err := client.Evaluation().Boolean(context.TODO(), req)
 	if err != nil {
 		panic(err)
 	}

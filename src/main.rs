@@ -28,37 +28,57 @@ pub enum Format {
     Text,
 }
 
-#[tokio::main]
-async fn main() -> Result<ExitCode> {
+fn main() -> Result<ExitCode> {
     setup_panic!();
 
     let args = Args::parse();
-
-    let mut ffs = Scanner::new(args.language, args.dir);
-
-    let found_flags = ffs.scan()?;
 
     let mut out_writer: Box<dyn std::io::Write> = match args.output {
         Some(s) => Box::new(std::fs::File::create(s)?),
         None => Box::new(std::io::stdout()),
     };
 
-    if !found_flags.is_empty() {
-        let results = found_flags
+    let mut ffs = Scanner::new(args.language, args.dir);
+
+    let found_flags = ffs.scan()?;
+    let filtered_flags = match args.namespace {
+        Some(s) => found_flags
             .into_iter()
-            .filter(|f| {
-                if let Some(ns) = &args.namespace {
-                    f.namespace_key == *ns
-                } else {
-                    true
-                }
+            .filter(|f| match &f.namespace_key {
+                Some(n) => n == &s,
+                None => false,
             })
-            .map(|f| Res {
-                message: format!(
-                    "Found flag: [key: {}, namespace: {}]",
-                    f.key, f.namespace_key
-                ),
-                flag: f,
+            .collect(),
+        None => found_flags,
+    };
+
+    if !filtered_flags.is_empty() {
+        let results = filtered_flags
+            .into_iter()
+            .map(|f| {
+                if f.namespace_key.is_none() && f.key.is_none() {
+                    Res {
+                        message: "Found flag".to_string(),
+                        flag: f,
+                    }
+                } else {
+                    let namespace_key = match &f.namespace_key {
+                        Some(s) => s,
+                        None => "default",
+                    };
+
+                    let key = match &f.key {
+                        Some(s) => s,
+                        None => "unknown",
+                    };
+                    Res {
+                        message: format!(
+                            "Found flag: [key: {}, namespace: {}]",
+                            key, namespace_key
+                        ),
+                        flag: f,
+                    }
+                }
             })
             .collect();
 

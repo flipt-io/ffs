@@ -72,38 +72,54 @@ impl Scanner {
                 // root node of the query match
                 let root = captures["call"];
 
-                let namespace_key = match captures.get("namespace_value") {
-                    Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
-                    None => "default",
-                };
-
-                let flag_key = match captures.get("flag_value") {
-                    Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
-                    None => "",
-                };
-
                 let range = root.node.range();
 
                 let file = path;
                 let start_line = range.start_point.row + 1;
                 let end_line = range.end_point.row + 1;
 
-                flags
-                    .entry(format!("{file}/{start_line}/{end_line}"))
-                    .or_insert(Flag {
-                        namespace_key: unescape(namespace_key).unwrap(),
-                        key: unescape(flag_key).unwrap(),
-                        location: Location {
-                            file: file.to_string(),
-                            start_line,
-                            start_column: range.start_point.column + 1,
-                            end_line,
-                            end_column: range.end_point.column + 1,
-                        },
-                    });
+                let implicit = match captures.get("args") {
+                    Some(_n) => false,
+                    None => true,
+                };
+
+                let location = Location {
+                    file: file.to_string(),
+                    start_line,
+                    start_column: range.start_point.column + 1,
+                    end_line,
+                    end_column: range.end_point.column + 1,
+                };
+
+                if !implicit {
+                    let namespace_key = match captures.get("namespace_value") {
+                        Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
+                        None => "default",
+                    };
+
+                    let flag_key = match captures.get("flag_value") {
+                        Some(n) => n.node.utf8_text(code.as_bytes()).unwrap(),
+                        None => "unknown",
+                    };
+
+                    flags
+                        .entry(format!("{file}/{start_line}/{end_line}"))
+                        .or_insert(Flag {
+                            namespace_key: Some(unescape(namespace_key).unwrap()),
+                            key: Some(unescape(flag_key).unwrap()),
+                            location,
+                        });
+                } else {
+                    flags
+                        .entry(format!("{file}/{start_line}/{end_line}"))
+                        .or_insert(Flag {
+                            namespace_key: None,
+                            key: None,
+                            location,
+                        });
+                }
             }
         }
-
         Ok(flags.values().cloned().collect())
     }
 }
