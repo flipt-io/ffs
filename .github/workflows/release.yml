@@ -58,6 +58,7 @@ jobs:
           shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: Linux Artifacts
           path: |
@@ -139,6 +140,7 @@ jobs:
           shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: Mac Artifacts
           path: |
