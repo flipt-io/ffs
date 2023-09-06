@@ -1,6 +1,6 @@
 [package]
 name = "ffs"
-version = "0.0.17"
+version = "0.0.18"
 description = "A CLI tool to find Flipt feature flags in code"
 edition = "2021"
 authors = ["Flipt Dev <dev@flipt.io>"]

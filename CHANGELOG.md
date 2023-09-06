@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.18](https://github.com/flipt-io/ffs/compare/v0.0.17...v0.0.18) (2023-09-06)
+
+
+### Features
+
+* allow for unknown arguments ([#56](https://github.com/flipt-io/ffs/issues/56)) ([2507abc](https://github.com/flipt-io/ffs/commit/2507abc0ea04cc62ea857d0eaeb9fbaa3a381615))
+
 ## [0.0.17](https://github.com/flipt-io/ffs/compare/v0.0.16...v0.0.17) (2023-09-05)
 
 
