@@ -52,9 +52,18 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cd target/${{ matrix.target }}/release          
+          pushd target/${{ matrix.target }}/release
           tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs 
-          cd -
+          popd
+          shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux Artifacts
+          path: |
+            ffs-${{ matrix.target }}.tar.gz
+            ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload to Release
         if: github.event_name == 'release'
@@ -62,7 +71,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
+          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
   release-darwin:
     name: release ${{ matrix.target }}
@@ -125,9 +134,18 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          cd target/${{ matrix.target }}/release          
+          pushd target/${{ matrix.target }}/release
           tar czvf ../../../ffs-${{ matrix.target }}.tar.gz ffs 
-          cd -
+          popd
+          shasum -a 256 ffs-${{ matrix.target }}.tar.gz > ffs-${{ matrix.target }}.tar.gz.sha256.txt
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mac Artifacts
+          path: |
+            ffs-${{ matrix.target }}.tar.gz
+            ffs-${{ matrix.target }}.tar.gz.sha256.txt
 
       - name: Upload to Release
         if: github.event_name == 'release'
@@ -135,4 +153,4 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz
+          gh release upload ${{ github.event.release.tag_name }} ffs-${{ matrix.target }}.tar.gz ffs-${{ matrix.target }}.tar.gz.sha256.txt
