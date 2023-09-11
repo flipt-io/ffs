@@ -14,6 +14,11 @@ impl From<String> for Language {
                 tree_sitter: tree_sitter_go::language(),
                 file_extension: ".go".to_string(),
             },
+            "typescript" => Language {
+                name: SupportedLanguage::Typescript,
+                tree_sitter: tree_sitter_typescript::language_typescript(),
+                file_extension: ".ts".to_string(),
+            },
             &_ => todo!("Language not supported"),
         }
     }
@@ -22,6 +27,7 @@ impl From<String> for Language {
 #[derive(clap::ValueEnum, Clone, Debug)]
 pub enum SupportedLanguage {
     Go,
+    Typescript,
     //  Rust,
 }
 
@@ -29,6 +35,7 @@ impl fmt::Display for SupportedLanguage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             SupportedLanguage::Go => write!(f, "go"),
+            SupportedLanguage::Typescript => write!(f, "typescript"),
         }
     }
 }
