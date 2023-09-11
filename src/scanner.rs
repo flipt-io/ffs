@@ -84,7 +84,7 @@ impl Scanner {
                 let before_line = code[..start_byte].lines().count().saturating_sub(10);
                 let after_line = code[..end_byte].lines().count().saturating_add(10);
 
-                // Print 10 lines before and after the node
+                // collect 10 lines before and after the node
                 let surrounding_lines: Vec<_> = code
                     .lines()
                     .skip(before_line - 1)
