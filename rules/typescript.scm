@@ -1,6 +1,6 @@
 (call_expression
   function: (member_expression
-    property: (property_identifier) @method (#match? @method "(getFlag|evaluate|boolean|variant)")
+    property: (property_identifier) @method (#match? @method "(boolean|variant)")
   )
   arguments: (arguments
       (object
