@@ -20,6 +20,8 @@ pub struct Args {
     pub dir: Option<String>,
     #[arg(short, long, help = "Namespace to filter [default: '']")]
     pub namespace: Option<String>,
+    #[arg(short, long, help = "Verbose output")]
+    pub verbose: bool,
 }
 
 #[derive(Clone, Debug, clap::ValueEnum)]
@@ -58,6 +60,7 @@ fn main() -> Result<ExitCode> {
             .map(|f| {
                 if f.namespace_key.is_none() && f.key.is_none() {
                     Res {
+                        verbose: args.verbose,
                         message: "Found flag".to_string(),
                         flag: f,
                     }
@@ -72,6 +75,7 @@ fn main() -> Result<ExitCode> {
                         None => "unknown",
                     };
                     Res {
+                        verbose: args.verbose,
                         message: format!(
                             "Found flag: [key: {}, namespace: {}]",
                             key, namespace_key
@@ -101,13 +105,24 @@ fn main() -> Result<ExitCode> {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct Res {
+    #[serde(skip)]
+    verbose: bool,
     message: String,
     flag: crate::types::flag::Flag,
 }
 
 impl fmt::Display for Res {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "- {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.flag.location.file, self.flag.location.start_line, self.flag.location.end_line, self.flag.location.start_column, self.flag.location.end_column)
+        write!(f, "- {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.flag.location.file, self.flag.location.start_line, self.flag.location.end_line, self.flag.location.start_column, self.flag.location.end_column)?;
+        if self.verbose {
+            write!(
+                f,
+                "\n\n```\n{}\n```",
+                self.flag.context.as_ref().unwrap().join("\n")
+            )
+        } else {
+            Ok(())
+        }
     }
 }
 
