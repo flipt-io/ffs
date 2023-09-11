@@ -13,7 +13,7 @@ const client = new FliptApiClient({
 });
 
 const response = await client.evaluation.variant({
-  namespaceKey: "default",
+  namespaceKey: DEFAULT_NAMESPACE,
   flagKey: "abc123",
   entityId: uuidv4(),
   context: {},
