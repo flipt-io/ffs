@@ -12,11 +12,20 @@ const client = new FliptApiClient({
   },
 });
 
-const response = await client.evaluation.variant({
+let response = await client.evaluation.variant({
   namespaceKey: DEFAULT_NAMESPACE,
   flagKey: "abc123",
   entityId: uuidv4(),
   context: {},
 });
 
-console.log("Received response from Flipt!", response);
+console.log("Received variant response from Flipt!", response);
+
+response = await client.evaluation.boolean({
+  namespaceKey: DEFAULT_NAMESPACE,
+  flagKey: "abc123",
+  entityId: uuidv4(),
+  context: {},
+});
+
+console.log("Received boolean response from Flipt!", response);

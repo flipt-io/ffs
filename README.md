@@ -87,10 +87,9 @@ Currently, the CLI tool is split into two parts:
 
 The parsing step look for instances of Flipt evaluation and flag retrieval methods:
 
-- `GetFlag`
-- `Evaluate` (v1 evaluation)
-- `Boolean` (v2 evaluation)
-- `Variant` (v2 evaluation)
+- [`GetFlag`](https://www.flipt.io/docs/reference/flags/get-flag)
+- [`Boolean`](https://www.flipt.io/docs/reference/evaluation/boolean-evaluation)
+- [`Variant`](https://www.flipt.io/docs/reference/evaluation/variant-evaluation)
 
 It accomplishes this by:
 
