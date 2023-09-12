@@ -9,10 +9,10 @@
         body: (literal_value
           (keyed_element
             (field_identifier) @namespace_key (#eq? @namespace_key "NamespaceKey")
-            (interpreted_string_literal) @namespace_value)
+            (_) @namespace_value)
           (keyed_element
             (field_identifier) @flag_key (#match? @flag_key "^(Key|FlagKey)$")
-            (interpreted_string_literal) @flag_value)
+            (_) @flag_value)
         )
       )
     )
@@ -31,7 +31,7 @@
         body: (literal_value
           (keyed_element
             (field_identifier) @flag_key (#match? @flag_key "^(Key|FlagKey)$")
-            (interpreted_string_literal) @flag_value)
+            (_) @flag_value)
         )
       )
     )

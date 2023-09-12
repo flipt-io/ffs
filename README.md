@@ -52,15 +52,15 @@ With args:
 
 `$ cargo build`
 
-## Limitations
+## Supported Languages
 
-Currently only supports parsing Go code.
+- Go
+- TypeScript
 
 Other language support is planned, but not yet implemented:
 
 - [ ] Python [#43](https://github.com/flipt-io/ffs/issues/43)
 - [ ] Java [#44](https://github.com/flipt-io/ffs/issues/44)
-- [ ] Javascript/Typescript [#42](https://github.com/flipt-io/ffs/issues/42)
 - [ ] Rust [#45](https://github.com/flipt-io/ffs/issues/45)
 
 ## Contributing
@@ -85,12 +85,11 @@ Currently, the CLI tool is split into two parts:
 
 ### Parsing
 
-The parsing step look for instances of Flipt evaluation and flag retrieval methods:
+The parsing step looks for instances of Flipt evaluation and flag retrieval methods:
 
-- `GetFlag`
-- `Evaluate` (v1 evaluation)
-- `Boolean` (v2 evaluation)
-- `Variant` (v2 evaluation)
+- [`GetFlag`](https://www.flipt.io/docs/reference/flags/get-flag)
+- [`Boolean`](https://www.flipt.io/docs/reference/evaluation/boolean-evaluation)
+- [`Variant`](https://www.flipt.io/docs/reference/evaluation/variant-evaluation)
 
 It accomplishes this by:
 
