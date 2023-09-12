@@ -78,6 +78,20 @@ impl Scanner {
                 let start_line = range.start_point.row + 1;
                 let end_line = range.end_point.row + 1;
 
+                let start_byte = range.start_byte;
+                let end_byte = range.end_byte;
+
+                let before_line = code[..start_byte].lines().count().saturating_sub(10);
+                let after_line = code[..end_byte].lines().count().saturating_add(10);
+
+                // collect 10 lines before and after the node
+                let surrounding_lines: Vec<_> = code
+                    .lines()
+                    .skip(before_line - 1)
+                    .take(after_line - before_line + 1)
+                    .map(|l| l.to_string())
+                    .collect();
+
                 let implicit = match captures.get("args") {
                     Some(_n) => false,
                     None => true,
@@ -108,6 +122,7 @@ impl Scanner {
                             namespace_key: Some(unescape(namespace_key).unwrap()),
                             key: Some(unescape(flag_key).unwrap()),
                             location,
+                            context: Some(surrounding_lines),
                         });
                 } else {
                     flags
@@ -116,6 +131,7 @@ impl Scanner {
                             namespace_key: None,
                             key: None,
                             location,
+                            context: Some(surrounding_lines),
                         });
                 }
             }

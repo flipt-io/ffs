@@ -2,8 +2,8 @@ use anyhow::Result;
 use clap::Parser;
 use ffs::scanner::Scanner;
 use ffs::types;
+use ffs::types::flag::Flag;
 use human_panic::setup_panic;
-use serde::Serialize;
 use std::fmt;
 use std::process::ExitCode;
 
@@ -20,6 +20,8 @@ pub struct Args {
     pub dir: Option<String>,
     #[arg(short, long, help = "Namespace to filter [default: '']")]
     pub namespace: Option<String>,
+    #[arg(short, long, help = "Display lines of context around flag")]
+    pub context: bool,
 }
 
 #[derive(Clone, Debug, clap::ValueEnum)]
@@ -53,43 +55,14 @@ fn main() -> Result<ExitCode> {
     };
 
     if !filtered_flags.is_empty() {
-        let results = filtered_flags
-            .into_iter()
-            .map(|f| {
-                if f.namespace_key.is_none() && f.key.is_none() {
-                    Res {
-                        message: "Found flag".to_string(),
-                        flag: f,
-                    }
-                } else {
-                    let namespace_key = match &f.namespace_key {
-                        Some(s) => s,
-                        None => "default",
-                    };
-
-                    let key = match &f.key {
-                        Some(s) => s,
-                        None => "unknown",
-                    };
-                    Res {
-                        message: format!(
-                            "Found flag: [key: {}, namespace: {}]",
-                            key, namespace_key
-                        ),
-                        flag: f,
-                    }
-                }
-            })
-            .collect();
-
         match args.format {
             Some(Format::Json) => {
-                let writer = JSONWriter::new(results);
+                let writer = JSONWriter::new(filtered_flags);
                 write!(out_writer, "{}", writer)?;
             }
             Some(Format::Text) | None => {
-                writeln!(out_writer, "Found {} results\n", results.len())?;
-                let writer = TextWriter::new(results);
+                writeln!(out_writer, "Found {} results:", filtered_flags.len())?;
+                let writer = TextWriter::new(filtered_flags, args.context);
                 write!(out_writer, "{}", writer)?;
             }
         }
@@ -98,25 +71,12 @@ fn main() -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct Res {
-    message: String,
-    flag: crate::types::flag::Flag,
-}
-
-impl fmt::Display for Res {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "- {}\n  File: {}\n  Line: {{ Start: {}, End: {} }}\n  Column: {{ Start: {}, End: {} }}", self.message, self.flag.location.file, self.flag.location.start_line, self.flag.location.end_line, self.flag.location.start_column, self.flag.location.end_column)
-    }
-}
-
 struct JSONWriter {
-    results: Vec<Res>,
+    results: Vec<Flag>,
 }
 
 impl JSONWriter {
-    fn new(results: Vec<Res>) -> Self {
+    fn new(results: Vec<Flag>) -> Self {
         JSONWriter { results }
     }
 }
@@ -129,20 +89,49 @@ impl fmt::Display for JSONWriter {
 }
 
 struct TextWriter {
-    results: Vec<Res>,
+    results: Vec<Flag>,
+    context: bool,
 }
 
 impl TextWriter {
-    fn new(results: Vec<Res>) -> Self {
-        TextWriter { results }
+    fn new(results: Vec<Flag>, context: bool) -> Self {
+        TextWriter { results, context }
     }
 }
 
 impl fmt::Display for TextWriter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for r in &self.results {
-            writeln!(f, "{}\n", r)?;
+        for flag in &self.results {
+            if flag.namespace_key.is_some() && flag.key.is_some() {
+                write!(
+                    f,
+                    "\n- Flag: [ Key: {}, Namespace: {} ]\n  File: {}\n",
+                    flag.key.as_ref().unwrap(),
+                    flag.namespace_key.as_ref().unwrap(),
+                    flag.location.file
+                )?;
+            } else {
+                write!(f, "\n- File: {}\n", flag.location.file)?;
+            }
+
+            writeln!(
+                f,
+                "  Line: [ Start: {}, End: {} ]\n  Column: [ Start: {}, End: {} ]",
+                flag.location.start_line,
+                flag.location.end_line,
+                flag.location.start_column,
+                flag.location.end_column
+            )?;
+
+            if self.context {
+                write!(
+                    f,
+                    "\n```\n{}\n```\n",
+                    flag.context.as_ref().unwrap().join("\n")
+                )?;
+            }
         }
+
         Ok(())
     }
 }
