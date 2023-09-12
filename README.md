@@ -85,7 +85,7 @@ Currently, the CLI tool is split into two parts:
 
 ### Parsing
 
-The parsing step look for instances of Flipt evaluation and flag retrieval methods:
+The parsing step looks for instances of Flipt evaluation and flag retrieval methods:
 
 - [`GetFlag`](https://www.flipt.io/docs/reference/flags/get-flag)
 - [`Boolean`](https://www.flipt.io/docs/reference/evaluation/boolean-evaluation)
