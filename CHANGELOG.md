@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.20](https://github.com/flipt-io/ffs/compare/v0.0.19...v0.0.20) (2023-09-12)
+
+
+### Features
+
+* support Typescript ([#65](https://github.com/flipt-io/ffs/issues/65)) ([2d99a5f](https://github.com/flipt-io/ffs/commit/2d99a5fa31ccc93990457545ad4134650f75d164))
+
 ## [0.0.19](https://github.com/flipt-io/ffs/compare/v0.0.18...v0.0.19) (2023-09-12)
 
 
