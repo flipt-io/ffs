@@ -52,7 +52,7 @@ With args:
 
 `$ cargo build`
 
-## Support Languages
+## Supported Languages
 
 - Go
 - TypeScript
