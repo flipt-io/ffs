@@ -52,15 +52,15 @@ With args:
 
 `$ cargo build`
 
-## Limitations
+## Support Languages
 
-Currently only supports parsing Go code.
+- Go
+- TypeScript
 
 Other language support is planned, but not yet implemented:
 
 - [ ] Python [#43](https://github.com/flipt-io/ffs/issues/43)
 - [ ] Java [#44](https://github.com/flipt-io/ffs/issues/44)
-- [ ] Javascript/Typescript [#42](https://github.com/flipt-io/ffs/issues/42)
 - [ ] Rust [#45](https://github.com/flipt-io/ffs/issues/45)
 
 ## Contributing
