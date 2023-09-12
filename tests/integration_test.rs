@@ -9,3 +9,15 @@ fn test_scan_go() {
 
     assert_eq!(results.len(), 6);
 }
+
+#[test]
+fn test_scan_typescript() {
+    let results = Scanner::new(
+        SupportedLanguage::Typescript,
+        Some("examples/typescript".to_string()),
+    )
+    .scan()
+    .unwrap();
+
+    assert_eq!(results.len(), 3);
+}
