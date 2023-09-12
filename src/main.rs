@@ -20,8 +20,8 @@ pub struct Args {
     pub dir: Option<String>,
     #[arg(short, long, help = "Namespace to filter [default: '']")]
     pub namespace: Option<String>,
-    #[arg(short, long, help = "Verbose output")]
-    pub verbose: bool,
+    #[arg(short, long, help = "Display lines of context around flag")]
+    pub context: bool,
 }
 
 #[derive(Clone, Debug, clap::ValueEnum)]
@@ -62,7 +62,7 @@ fn main() -> Result<ExitCode> {
             }
             Some(Format::Text) | None => {
                 writeln!(out_writer, "Found {} results:", filtered_flags.len())?;
-                let writer = TextWriter::new(filtered_flags, args.verbose);
+                let writer = TextWriter::new(filtered_flags, args.context);
                 write!(out_writer, "{}", writer)?;
             }
         }
@@ -89,13 +89,13 @@ impl fmt::Display for JSONWriter {
 }
 
 struct TextWriter {
-    verbose: bool,
     results: Vec<Flag>,
+    context: bool,
 }
 
 impl TextWriter {
-    fn new(results: Vec<Flag>, verbose: bool) -> Self {
-        TextWriter { verbose, results }
+    fn new(results: Vec<Flag>, context: bool) -> Self {
+        TextWriter { results, context }
     }
 }
 
@@ -123,7 +123,7 @@ impl fmt::Display for TextWriter {
                 flag.location.end_column
             )?;
 
-            if self.verbose {
+            if self.context {
                 write!(
                     f,
                     "\n```\n{}\n```\n",
