@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.19](https://github.com/flipt-io/ffs/compare/v0.0.18...v0.0.19) (2023-09-12)
+
+
+### Features
+
+* Add context ([#63](https://github.com/flipt-io/ffs/issues/63)) ([54eebb4](https://github.com/flipt-io/ffs/commit/54eebb45df65186bf9a82227f40e23460083ba22))
+
 ## [0.0.18](https://github.com/flipt-io/ffs/compare/v0.0.17...v0.0.18) (2023-09-06)
 
 
