@@ -1,6 +1,7 @@
 # Flipt Flag Search
 
 ![Release](https://img.shields.io/github/release/flipt-io/ffs.svg?style=flat)
+![Status](https://img.shields.io/badge/status-expiremental-orange)
 
 Find [Flipt](https://github.com/flipt-io/flipt) feature flags in your codebase
 
@@ -30,6 +31,7 @@ Options:
   -f, --format <FORMAT>        [default: text] [possible values: json, text]
   -d, --dir <DIR>              Path to directory to scan [default: .]
   -n, --namespace <NAMESPACE>  Namespace to filter [default: '']
+  -c, --context                Display lines of context around flag
   -h, --help                   Print help
   -V, --version                Print version
 ```
@@ -99,23 +101,105 @@ The query rules are written as an S-Expression: ie: [go.scm](./rules/go.scm)
 
 ### Reporting
 
-The tool takes output of the parser step and reports the results to the CLI
+The tool takes output of the parser step and reports the results to the CLI.
+
+`ffs -l go`
+
+```console
+Found 6 results:
+
+- Flag: [ Key: bar, Namespace: production ]
+  File: ./examples/go/evaluation.go
+  Line: [ Start: 31, End: 39 ]
+  Column: [ Start: 11, End: 4 ]
+```
+
+Or as JSON: `ffs -l go -f json`
 
 ```json
 [
   {
-    "message": "Found flag: [key: bar, namespace: production]",
-    "flag": {
-      "namespaceKey": "production",
-      "key": "bar",
-      "location": {
-        "file": "./examples/go/basic.go",
-        "startLine": 36,
-        "startColumn": 11,
-        "endLine": 43,
-        "endColumn": 4
-      }
+    "namespaceKey": "production",
+    "key": "bar",
+    "context": [
+      "\t\tNamespaceKey: \"default\",",
+      "\t\tFlagKey:      \"foo\",",
+      "\t\tContext: map[string]string{",
+      "\t\t\t\"bar\": \"boz\",",
+      "\t\t},",
+      "\t})",
+      "\tif err != nil {",
+      "\t\tpanic(err)",
+      "\t}",
+      "",
+      "\t_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{",
+      "\t\tEntityId:     \"1\",",
+      "\t\tNamespaceKey: \"production\",",
+      "\t\tFlagKey:      \"bar\",",
+      "\t\tContext: map[string]string{",
+      "\t\t\t\"bar\": \"boz\",",
+      "\t\t},",
+      "\t})",
+      "\tif err != nil {",
+      "\t\tpanic(err)",
+      "\t}",
+      "",
+      "\t_, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{",
+      "\t\tEntityId: \"1\",",
+      "\t\tFlagKey:  \"boz\",",
+      "\t\tContext: map[string]string{",
+      "\t\t\t\"bar\": \"boz\",",
+      "\t\t},"
+    ],
+    "location": {
+      "file": "./examples/go/basic.go",
+      "startLine": 36,
+      "startColumn": 11,
+      "endLine": 43,
+      "endColumn": 4
     }
-  }
-]
+  },
+```
+
+The JSON format is useful for integrating with other tools, and also provides the `context` code around the flag usage.
+
+You can also get the context output in the text format by providing the `--context` flag:
+
+`ffs -l go --context`
+
+```console
+- Flag: [ Key: boz, Namespace: default ]
+  File: ./examples/go/basic.go
+  Line: [ Start: 48, End: 54 ]
+  Column: [ Start: 11, End: 4 ]
+
+/```
+  NamespaceKey: "production",
+  FlagKey:      "bar",
+  Context: map[string]string{
+   "bar": "boz",
+  },
+ })
+ if err != nil {
+  panic(err)
+ }
+
+ _, err = client.Flipt().Evaluate(context.TODO(), &flipt.EvaluationRequest{
+  EntityId: "1",
+  FlagKey:  "boz",
+  Context: map[string]string{
+   "bar": "boz",
+  },
+ })
+ if err != nil {
+  panic(err)
+ }
+
+ flag, err := client.Flipt().GetFlag(context.TODO(), &flipt.GetFlagRequest{
+  Key: "foo",
+ })
+ if err != nil {
+  panic(err)
+ }
+/```
 ```
