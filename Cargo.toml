@@ -12,7 +12,7 @@ license = "Apache-2.0"
 
 [dependencies]
 anyhow = "1.0.75"
-clap = { version = "4.2.0", features = ["derive"] }
+clap = { version = "4.4.4", features = ["derive"] }
 human-panic = "1.2.0"
 rust-embed = "8.0.0"
 serde = "1.0.159"
